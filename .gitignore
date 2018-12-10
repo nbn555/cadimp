@@ -1,0 +1,13 @@
+**/msvc/ICad/GeneratedFiles/**
+**/ICad.vcxproj.user
+*.VC.db
+*.opendb
+**/.vs
+**/bin
+lib
+
+# Build file of dependencies
+**/msvc/BaseLib/x64/
+**/msvc/CadLib/x64/
+**/msvc/ICad/x64/
+**/msvc/ImgCatch/x64/

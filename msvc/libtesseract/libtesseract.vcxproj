@@ -1,0 +1,724 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\textCatch\tesseract\api\baseapi.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\api\capi.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\api\pdfrenderer.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\api\renderer.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\api\TextDetectorAPI.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccmain\adaptions.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccmain\applybox.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccmain\control.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccmain\cubeclassifier.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccmain\cube_control.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccmain\cube_reco_context.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccmain\docqual.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccmain\equationdetect.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccmain\fixspace.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccmain\fixxht.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccmain\ltrresultiterator.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccmain\osdetect.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccmain\output.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccmain\pageiterator.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccmain\pagesegmain.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccmain\pagewalk.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccmain\paragraphs.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccmain\paramsd.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccmain\par_control.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccmain\pgedit.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccmain\recogtraining.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccmain\reject.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccmain\resultiterator.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccmain\superscript.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccmain\tessbox.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccmain\tessedit.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccmain\tesseractclass.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccmain\tesseract_cube_combiner.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccmain\tessvars.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccmain\tfacepp.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccmain\thresholder.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccmain\werdit.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccstruct\blamer.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccstruct\blobbox.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccstruct\blobs.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccstruct\blread.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccstruct\boxread.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccstruct\boxword.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccstruct\ccstruct.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccstruct\coutln.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccstruct\detlinefit.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccstruct\dppoint.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccstruct\fontinfo.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccstruct\genblob.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccstruct\imagedata.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccstruct\linlsq.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccstruct\matrix.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccstruct\mod128.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccstruct\normalis.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccstruct\ocrblock.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccstruct\ocrpara.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccstruct\ocrrow.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccstruct\otsuthr.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccstruct\pageres.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccstruct\params_training_featdef.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccstruct\pdblock.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccstruct\points.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccstruct\polyaprx.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccstruct\polyblk.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccstruct\publictypes.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccstruct\quadlsq.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccstruct\quspline.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccstruct\ratngs.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccstruct\rect.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccstruct\rejctmap.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccstruct\seam.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccstruct\split.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccstruct\statistc.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccstruct\stepblob.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccstruct\vecfuncs.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccstruct\werd.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccutil\ambigs.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccutil\basedir.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccutil\bits16.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccutil\bitvector.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccutil\ccutil.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccutil\clst.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccutil\elst.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccutil\elst2.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccutil\errcode.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccutil\globaloc.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccutil\indexmapbidi.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccutil\mainblk.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccutil\memry.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccutil\params.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccutil\scanutils.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccutil\serialis.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccutil\strngs.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccutil\tessdatamanager.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccutil\tprintf.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccutil\unichar.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccutil\unicharmap.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccutil\unicharset.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccutil\unicodes.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\ccutil\universalambigs.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\classify\adaptive.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\classify\adaptmatch.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\classify\blobclass.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\classify\classify.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\classify\cluster.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\classify\clusttool.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\classify\cutoffs.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\classify\errorcounter.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\classify\featdefs.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\classify\float2int.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\classify\fpoint.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\classify\intfeaturedist.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\classify\intfeaturemap.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\classify\intfeaturespace.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\classify\intfx.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\classify\intmatcher.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\classify\intproto.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\classify\kdtree.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\classify\mastertrainer.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\classify\mf.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\classify\mfdefs.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\classify\mfoutline.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\classify\mfx.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\classify\normfeat.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\classify\normmatch.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\classify\ocrfeatures.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\classify\outfeat.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\classify\picofeat.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\classify\protos.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\classify\sampleiterator.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\classify\shapeclassifier.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\classify\shapetable.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\classify\tessclassifier.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\classify\trainingsample.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\classify\trainingsampleset.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\cube\altlist.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\cube\beam_search.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\cube\bmp_8.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\cube\cached_file.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\cube\char_altlist.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\cube\char_bigrams.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\cube\char_samp.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\cube\char_samp_enum.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\cube\char_samp_set.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\cube\char_set.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\cube\classifier_factory.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\cube\conv_net_classifier.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\cube\con_comp.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\cube\cube_line_object.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\cube\cube_line_segmenter.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\cube\cube_object.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\cube\cube_search_object.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\cube\cube_tuning_params.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\cube\cube_utils.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\cube\feature_bmp.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\cube\feature_chebyshev.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\cube\feature_hybrid.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\cube\hybrid_neural_net_classifier.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\cube\search_column.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\cube\search_node.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\cube\tess_lang_model.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\cube\tess_lang_mod_edge.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\cube\word_altlist.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\cube\word_list_lang_model.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\cube\word_size_model.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\cube\word_unigrams.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\cutil\bitvec.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\cutil\callcpp.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\cutil\cutil.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\cutil\cutil_class.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\cutil\danerror.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\cutil\efio.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\cutil\emalloc.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\cutil\freelist.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\cutil\oldlist.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\cutil\structures.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\dict\context.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\dict\dawg.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\dict\dawg_cache.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\dict\dict.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\dict\hyphen.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\dict\permdawg.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\dict\stopper.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\dict\trie.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\neural_networks\runtime\input_file_buffer.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\neural_networks\runtime\neural_net.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\neural_networks\runtime\neuron.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\neural_networks\runtime\sigmoid_table.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\opencl\openclwrapper.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\textord\alignedblob.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\textord\baselinedetect.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\textord\bbgrid.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\textord\blkocc.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\textord\blobgrid.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\textord\ccnontextdetect.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\textord\cjkpitch.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\textord\colfind.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\textord\colpartition.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\textord\colpartitiongrid.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\textord\colpartitionset.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\textord\devanagari_processing.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\textord\drawedg.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\textord\drawtord.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\textord\edgblob.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\textord\edgloop.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\textord\equationdetectbase.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\textord\fpchop.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\textord\gap_map.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\textord\imagefind.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\textord\linefind.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\textord\makerow.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\textord\oldbasel.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\textord\pithsync.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\textord\pitsync1.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\textord\scanedg.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\textord\sortflts.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\textord\strokewidth.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\textord\tabfind.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\textord\tablefind.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\textord\tablerecog.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\textord\tabvector.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\textord\textlineprojection.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\textord\textord.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\textord\topitch.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\textord\tordmain.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\textord\tospace.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\textord\tovars.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\textord\underlin.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\textord\wordseg.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\textord\workingpartset.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\viewer\scrollview.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\viewer\svmnode.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\viewer\svpaint.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\viewer\svutil.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\vs2010\port\gettimeofday.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\vs2010\port\strcasestr.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\vs2010\port\strtok_r.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\wordrec\associate.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\wordrec\chop.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\wordrec\chopper.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\wordrec\drawfx.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\wordrec\findseam.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\wordrec\gradechop.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\wordrec\language_model.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\wordrec\lm_consistency.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\wordrec\lm_pain_points.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\wordrec\lm_state.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\wordrec\outlines.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\wordrec\params_model.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\wordrec\pieces.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\wordrec\plotedges.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\wordrec\render.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\wordrec\segsearch.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\wordrec\tface.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\wordrec\wordclass.cpp" />
+    <ClCompile Include="..\..\textCatch\tesseract\wordrec\wordrec.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\textCatch\tesseract\api\apitypes.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\api\baseapi.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\api\capi.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\api\renderer.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\api\TextDetectorAPI.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccmain\control.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccmain\cubeclassifier.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccmain\cube_reco_context.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccmain\docqual.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccmain\equationdetect.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccmain\fixspace.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccmain\ltrresultiterator.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccmain\mutableiterator.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccmain\osdetect.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccmain\output.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccmain\pageiterator.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccmain\paragraphs.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccmain\paragraphs_internal.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccmain\paramsd.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccmain\pgedit.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccmain\reject.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccmain\resultiterator.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccmain\tessbox.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccmain\tessedit.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccmain\tesseractclass.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccmain\tesseract_cube_combiner.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccmain\tessvars.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccmain\thresholder.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccmain\werdit.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccstruct\blamer.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccstruct\blckerr.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccstruct\blobbox.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccstruct\blobs.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccstruct\blread.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccstruct\boxread.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccstruct\boxword.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccstruct\ccstruct.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccstruct\coutln.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccstruct\crakedge.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccstruct\detlinefit.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccstruct\dppoint.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccstruct\fontinfo.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccstruct\genblob.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccstruct\hpdsizes.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccstruct\imagedata.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccstruct\ipoints.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccstruct\linlsq.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccstruct\matrix.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccstruct\mod128.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccstruct\normalis.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccstruct\ocrblock.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccstruct\ocrpara.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccstruct\ocrrow.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccstruct\otsuthr.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccstruct\pageres.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccstruct\params_training_featdef.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccstruct\pdblock.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccstruct\points.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccstruct\polyaprx.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccstruct\polyblk.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccstruct\publictypes.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccstruct\quadlsq.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccstruct\quadratc.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccstruct\quspline.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccstruct\ratngs.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccstruct\rect.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccstruct\rejctmap.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccstruct\seam.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccstruct\split.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccstruct\statistc.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccstruct\stepblob.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccstruct\vecfuncs.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccstruct\werd.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccutil\ambigs.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccutil\basedir.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccutil\bits16.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccutil\bitvector.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccutil\ccutil.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccutil\clst.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccutil\doubleptr.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccutil\elst.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccutil\elst2.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccutil\errcode.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccutil\fileerr.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccutil\genericheap.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccutil\genericvector.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccutil\globaloc.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccutil\hashfn.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccutil\helpers.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccutil\host.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccutil\indexmapbidi.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccutil\kdpair.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccutil\lsterr.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccutil\memry.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccutil\ndminx.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccutil\nwmain.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccutil\object_cache.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccutil\ocrclass.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccutil\params.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccutil\platform.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccutil\qrsequence.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccutil\scanutils.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccutil\serialis.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccutil\sorthelper.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccutil\stderr.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccutil\strngs.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccutil\tesscallback.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccutil\tessdatamanager.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccutil\tprintf.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccutil\unichar.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccutil\unicharmap.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccutil\unicharset.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccutil\unicity_table.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccutil\unicodes.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\ccutil\universalambigs.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\classify\adaptive.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\classify\blobclass.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\classify\classify.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\classify\cluster.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\classify\clusttool.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\classify\cutoffs.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\classify\errorcounter.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\classify\featdefs.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\classify\float2int.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\classify\fpoint.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\classify\intfeaturedist.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\classify\intfeaturemap.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\classify\intfeaturespace.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\classify\intfx.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\classify\intmatcher.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\classify\intproto.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\classify\kdtree.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\classify\mastertrainer.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\classify\mf.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\classify\mfdefs.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\classify\mfoutline.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\classify\mfx.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\classify\normfeat.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\classify\normmatch.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\classify\ocrfeatures.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\classify\outfeat.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\classify\picofeat.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\classify\protos.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\classify\sampleiterator.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\classify\shapeclassifier.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\classify\shapetable.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\classify\tessclassifier.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\classify\trainingsample.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\classify\trainingsampleset.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\cube\altlist.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\cube\beam_search.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\cube\bmp_8.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\cube\cached_file.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\cube\char_altlist.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\cube\char_bigrams.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\cube\char_samp.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\cube\char_samp_enum.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\cube\char_samp_set.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\cube\char_set.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\cube\classifier_base.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\cube\classifier_factory.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\cube\conv_net_classifier.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\cube\con_comp.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\cube\cube_const.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\cube\cube_line_object.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\cube\cube_line_segmenter.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\cube\cube_object.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\cube\cube_search_object.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\cube\cube_tuning_params.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\cube\cube_utils.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\cube\feature_base.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\cube\feature_bmp.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\cube\feature_chebyshev.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\cube\feature_hybrid.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\cube\hybrid_neural_net_classifier.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\cube\lang_model.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\cube\lang_mod_edge.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\cube\search_column.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\cube\search_node.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\cube\search_object.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\cube\string_32.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\cube\tess_lang_model.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\cube\tess_lang_mod_edge.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\cube\tuning_params.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\cube\word_altlist.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\cube\word_list_lang_model.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\cube\word_size_model.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\cube\word_unigrams.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\cutil\bitvec.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\cutil\callcpp.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\cutil\const.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\cutil\cutil.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\cutil\cutil_class.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\cutil\danerror.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\cutil\efio.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\cutil\emalloc.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\cutil\freelist.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\cutil\globals.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\cutil\oldlist.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\cutil\structures.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\dict\dawg.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\dict\dawg_cache.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\dict\dict.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\dict\matchdefs.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\dict\stopper.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\dict\trie.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\neural_networks\runtime\input_file_buffer.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\neural_networks\runtime\neural_net.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\neural_networks\runtime\neuron.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\opencl\oclkernels.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\opencl\openclwrapper.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\opencl\opencl_device_selection.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\textord\alignedblob.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\textord\baselinedetect.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\textord\bbgrid.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\textord\blkocc.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\textord\blobgrid.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\textord\ccnontextdetect.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\textord\cjkpitch.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\textord\colfind.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\textord\colpartition.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\textord\colpartitiongrid.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\textord\colpartitionset.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\textord\devanagari_processing.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\textord\drawedg.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\textord\drawtord.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\textord\edgblob.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\textord\edgloop.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\textord\equationdetectbase.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\textord\fpchop.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\textord\gap_map.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\textord\imagefind.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\textord\linefind.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\textord\makerow.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\textord\oldbasel.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\textord\pithsync.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\textord\pitsync1.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\textord\scanedg.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\textord\sortflts.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\textord\strokewidth.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\textord\tabfind.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\textord\tablefind.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\textord\tablerecog.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\textord\tabvector.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\textord\textlineprojection.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\textord\textord.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\textord\topitch.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\textord\tordmain.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\textord\tovars.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\textord\underlin.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\textord\wordseg.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\textord\workingpartset.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\viewer\scrollview.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\viewer\svmnode.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\viewer\svutil.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\vs2010\port\gettimeofday.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\vs2010\port\mathfix.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\vs2010\port\strcasestr.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\vs2010\port\strtok_r.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\vs2010\port\vcsversion.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\wordrec\associate.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\wordrec\chop.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\wordrec\chopper.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\wordrec\drawfx.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\wordrec\findseam.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\wordrec\gradechop.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\wordrec\language_model.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\wordrec\lm_consistency.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\wordrec\lm_pain_points.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\wordrec\lm_state.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\wordrec\measure.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\wordrec\outlines.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\wordrec\params_model.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\wordrec\plotedges.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\wordrec\render.h" />
+    <ClInclude Include="..\..\textCatch\tesseract\wordrec\wordrec.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\textCatch\tesseract\ccmain\Makefile.am" />
+    <None Include="..\..\textCatch\tesseract\ccstruct\Makefile.am" />
+    <None Include="..\..\textCatch\tesseract\ccutil\Makefile.am" />
+    <None Include="..\..\textCatch\tesseract\classify\Makefile.am" />
+    <None Include="..\..\textCatch\tesseract\cube\Makefile.am" />
+    <None Include="..\..\textCatch\tesseract\textord\Makefile.am" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{D5811ADA-EF79-4F95-A81C-0CAE618C1198}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>libtesseract</RootNamespace>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>NotSet</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>NotSet</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>NotSet</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>NotSet</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <CodeAnalysisRuleSet>NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <OutDir>../../lib/</OutDir>
+    <TargetName>$(ProjectName)d</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <CodeAnalysisRuleSet>NativeMinimumRules.ruleset</CodeAnalysisRuleSet>
+    <OutDir>../../lib/</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <CodeAnalysisRuleSet>NativeMinimumRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <CodeAnalysisRuleSet>NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>GRAPHICS_DISABLED;_SILENCE_STDEXT_HASH_DEPRECATION_WARNINGS;_CRT_SECURE_NO_WARNINGS;_LIB;USE_STD_NAMESPACE;WINDLLNAME="$(TargetFileName)"; WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)tesseract_3.05\vs2010\port;$(SolutionDir)tesseract_3.05\api;$(SolutionDir)tesseract_3.05\ccmain;$(SolutionDir)tesseract_3.05\ccutil;$(SolutionDir)tesseract_3.05\ccstruct;$(SolutionDir)tesseract_3.05\classify;$(SolutionDir)tesseract_3.05\cube;$(SolutionDir)tesseract_3.05\cutil;$(SolutionDir)tesseract_3.05\dict;$(SolutionDir)tesseract_3.05\neural_networks\runtime;$(SolutionDir)tesseract_3.05\textord;$(SolutionDir)tesseract_3.05\viewer;$(SolutionDir)tesseract_3.05\opencl;$(SolutionDir)tesseract_3.05\wordrec;$(SolutionDir)liblept;$(SolutionDir)leptonica\src</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <StringPooling>true</StringPooling>
+      <MinimalRebuild>false</MinimalRebuild>
+      <DisableSpecificWarnings>4305</DisableSpecificWarnings>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <FloatingPointModel>Fast</FloatingPointModel>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>GRAPHICS_DISABLED;_SILENCE_STDEXT_HASH_DEPRECATION_WARNINGS;_CRT_SECURE_NO_WARNINGS;_LIB;USE_STD_NAMESPACE;WINDLLNAME="$(TargetFileName)"; _DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\textCatch\tesseract\vs2010\port;..\..\textCatch\tesseract\api;..\..\textCatch\tesseract\ccmain;..\..\textCatch\tesseract\ccutil;..\..\textCatch\tesseract\ccstruct;..\..\textCatch\tesseract\classify;..\..\textCatch\tesseract\cube;..\..\textCatch\tesseract\cutil;..\..\textCatch\tesseract\dict;..\..\textCatch\tesseract\neural_networks\runtime;..\..\textCatch\tesseract\textord;..\..\textCatch\tesseract\viewer;..\..\textCatch\tesseract\opencl;..\..\textCatch\tesseract\wordrec;..\..\vendor\liblept;..\..\textCatch\leptonica\src</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <StringPooling>true</StringPooling>
+      <MinimalRebuild>false</MinimalRebuild>
+      <DisableSpecificWarnings>4305</DisableSpecificWarnings>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <FloatingPointModel>Fast</FloatingPointModel>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>Full</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>GRAPHICS_DISABLED;_SILENCE_STDEXT_HASH_DEPRECATION_WARNINGS;_CRT_SECURE_NO_WARNINGS;_LIB;USE_STD_NAMESPACE;WINDLLNAME="$(TargetFileName)"; WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)tesseract_3.05\vs2010\port;$(SolutionDir)tesseract_3.05\api;$(SolutionDir)tesseract_3.05\ccmain;$(SolutionDir)tesseract_3.05\ccutil;$(SolutionDir)tesseract_3.05\ccstruct;$(SolutionDir)tesseract_3.05\classify;$(SolutionDir)tesseract_3.05\cube;$(SolutionDir)tesseract_3.05\cutil;$(SolutionDir)tesseract_3.05\dict;$(SolutionDir)tesseract_3.05\neural_networks\runtime;$(SolutionDir)tesseract_3.05\textord;$(SolutionDir)tesseract_3.05\viewer;$(SolutionDir)tesseract_3.05\opencl;$(SolutionDir)tesseract_3.05\wordrec;$(SolutionDir)liblept;$(SolutionDir)leptonica\src</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <StringPooling>true</StringPooling>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <AdditionalOptions>/Qvec-report:1</AdditionalOptions>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <DisableSpecificWarnings>4305</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>Full</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>GRAPHICS_DISABLED;_SILENCE_STDEXT_HASH_DEPRECATION_WARNINGS;_CRT_SECURE_NO_WARNINGS;_LIB;USE_STD_NAMESPACE;WINDLLNAME="$(TargetFileName)"; NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\textCatch\tesseract\vs2010\port;..\..\textCatch\tesseract\api;..\..\textCatch\tesseract\ccmain;..\..\textCatch\tesseract\ccutil;..\..\textCatch\tesseract\ccstruct;..\..\textCatch\tesseract\classify;..\..\textCatch\tesseract\cube;..\..\textCatch\tesseract\cutil;..\..\textCatch\tesseract\dict;..\..\textCatch\tesseract\neural_networks\runtime;..\..\textCatch\tesseract\textord;..\..\textCatch\tesseract\viewer;..\..\textCatch\tesseract\opencl;..\..\textCatch\tesseract\wordrec;..\..\vendor\liblept;..\..\textCatch\leptonica\src</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <StringPooling>true</StringPooling>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <AdditionalOptions>/Qvec-report:1</AdditionalOptions>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <DisableSpecificWarnings>4305</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
