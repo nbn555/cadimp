@@ -5,11 +5,19 @@
 #include "opencv2/imgcodecs.hpp"
 #include "opencv2/highgui.hpp"
 #include "opencv2/imgproc.hpp"
-#include "point2D.h"
+
 #include <vector>
 using namespace cv;
 using namespace std;
 
+struct Point2Dd {
+    double _v[2];
+    Point2Dd() {}
+    Point2Dd(double x, double y) {
+        _v[0] = x;
+        _v[1] = y;
+    }
+};
 struct sline {
     Point2Dd p1;
     Point2Dd p2;

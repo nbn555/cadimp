@@ -1,5 +1,5 @@
 #include "shape_detection.h"
-#include "Point2D.h"
+
 
 void thinningIteration(cv::Mat& img, int iter)
 {

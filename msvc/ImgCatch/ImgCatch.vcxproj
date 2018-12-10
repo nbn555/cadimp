@@ -140,12 +140,14 @@
   <ItemGroup>
     <ClInclude Include="..\..\inc\ImgCatch\LiProcess.h" />
     <ClInclude Include="..\..\inc\ImgCatch\preprocessing.h" />
+    <ClInclude Include="..\..\inc\ImgCatch\shape_detection.h" />
     <ClInclude Include="..\..\inc\ImgCatch\TextDetectorAPI.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\ImgCatch\LiProcess.cpp" />
     <ClCompile Include="..\..\src\ImgCatch\preprocessing.cpp" />
     <ClCompile Include="..\..\src\ImgCatch\recognition.cpp" />
+    <ClCompile Include="..\..\src\ImgCatch\shape_detection.cpp" />
     <ClCompile Include="..\..\src\ImgCatch\TextDetectorAPI.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
