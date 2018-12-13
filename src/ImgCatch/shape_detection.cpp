@@ -96,28 +96,28 @@ void thinning(const cv::Mat& src, cv::Mat& dst)
 }
 
 #if 1
-double getDistance(const Point2f& point1, const Point2f& point2){
-	return sqrt(pow(point1.x - point2.x,2) + pow(point1.y-point2.y,2));
-}
+// double getDistance(const Point2f& point1, const Point2f& point2){
+// 	return sqrt(pow(point1.x - point2.x,2) + pow(point1.y-point2.y,2));
+// }
 
-Point2Dd getMidPoint(p1,p2){
-	Point2Dd mid_point;
-	mid_point.x = (p1.x+p2.x)/2;
-	mid_point.y = (p1.y+p2.y)/2;
-	return mid_point;
-}
+// Point2Dd getMidPoint(p1,p2){
+// 	Point2Dd mid_point;
+// 	mid_point.x = (p1.x+p2.x)/2;
+// 	mid_point.y = (p1.y+p2.y)/2;
+// 	return mid_point;
+// }
 
 void getLines(Mat src, std::vector<sline>& lines)
 {
 	cv::Mat gray_image;
-	cv::Mat edges_image;
-	cv::Mat new_image;
-	std::vector<std::vector<Point>> vtContours;
-	std::vector<Vec4i> vtHierarchy;
+	#cv::Mat edges_image;
+	//cv::Mat new_image;
+	//std::vector<std::vector<Point>> vtContours;
+	//std::vector<Vec4i> vtHierarchy;
 	std::vector<Vec4f> vtLines;
 	int nRows = src.rows;
 
-	cv::cvtColor(src,gray_image, CV_BGR2GRAY)
+	cv::cvtColor(src,gray_image, CV_BGR2GRAY);
 	gray_image =  cv::Scalar::all(255) - gray_image;
 	cv::threshold(gray_image,gray_image,0,255,CV_THRESH_BINARY + CV_THRESH_OTSU);
 
@@ -149,11 +149,11 @@ void getLines(Mat src, std::vector<sline>& lines)
 	Ptr<LineSegmentDetector> ls = createLineSegmentDetector(LSD_REFINE_STD);
     
     // Detect the lines
-    ls->detect(image, vtLines);
+    ls->detect(gray_image, vtLines);
 	if (vtLines.size() > 0){
-		for (auto&& line:vtLines){
-			Point2f point1 = Point2f(line[0],line[1]);
-			Point2f point2 = Point2f(line[2],line[3]);
+		for (auto&& segment_line:vtLines){
+			auto point1 = Point2f(segment_line[0],segment_line[1]);
+			auto point2 = Point2f(segment_line[2],segment_line[3]);
 			auto gray_temp_image = cv::Mat:zeros(src.size(),CV_8UC1);
 
 			// The following code helps remove some lines that generate from arc, cricles.
@@ -163,10 +163,10 @@ void getLines(Mat src, std::vector<sline>& lines)
 			auto after_area = (double)cv::countNonZero(gray_temp_image);
 
 			if (after_area/before_area > 0.15){
-				sline line;
-				line.p1 = Point2Dd(line[0],nRows - line[1]);
-				line.p2 = Point2Dd(line[2],nRows - line[3])
-				lines.push_back(line)
+				sline sSegment_line;
+				sSegment_line.p1 = Point2Dd(segment_line[0],nRows - segment_line[1]);
+				sSegment_line.p2 = Point2Dd(segment_line[2],nRows - segment_line[3]);
+				lines.push_back(sSegment_line);
 			}
 		}
 	}
