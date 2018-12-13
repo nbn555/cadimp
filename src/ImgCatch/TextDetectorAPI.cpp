@@ -487,7 +487,7 @@ bool detectText(Mat &src, vector<pair<string, RotatedRect>> &outText) {
 				rect.angle += 90.0;
 			}
 		}
-		if (rect.size.height > src.rows / 30)
+		if (rect.size.height > src.rows / 10)
 		{
 			continue;
 		}
