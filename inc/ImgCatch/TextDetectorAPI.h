@@ -12,5 +12,4 @@ using namespace std;
 using namespace cv;
 
 
-//bool detectText(const char* image, std::vector<tesseract::DetectedText> &detectedTextList);
 bool detectText(Mat &im, vector<pair<string, RotatedRect>> &outText);
