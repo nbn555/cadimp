@@ -110,7 +110,7 @@ void thinning(const cv::Mat& src, cv::Mat& dst)
 void getLines(Mat src, std::vector<sline>& lines)
 {
 	cv::Mat gray_image;
-	#cv::Mat edges_image;
+	//cv::Mat edges_image;
 	//cv::Mat new_image;
 	//std::vector<std::vector<Point>> vtContours;
 	//std::vector<Vec4i> vtHierarchy;
