@@ -1,5 +1,5 @@
 #include "shape_detection.h"
-
+#include <math.h>
 
 void thinningIteration(cv::Mat& img, int iter)
 {
@@ -96,86 +96,81 @@ void thinning(const cv::Mat& src, cv::Mat& dst)
 }
 
 #if 1
+double getDistance(const Point2f& point1, const Point2f& point2){
+	return sqrt(pow(point1.x - point2.x,2) + pow(point1.y-point2.y,2));
+}
+
+Point2Dd getMidPoint(p1,p2){
+	Point2Dd mid_point;
+	mid_point.x = (p1.x+p2.x)/2;
+	mid_point.y = (p1.y+p2.y)/2;
+	return mid_point;
+}
 
 void getLines(Mat src, std::vector<sline>& lines)
 {
-	cv::Mat invSrc = cv::Scalar::all(255) - src;
-	cv::Mat bw;
-	cv::cvtColor(invSrc, bw, CV_BGR2GRAY);
-	//GaussianBlur(bw, bw, Size(3, 3), 0, 0 );
-    double threshold = 80.0;
-	cv::threshold(bw, bw, threshold, 255, CV_THRESH_BINARY + CV_THRESH_OTSU);
-   // cv::imshow("bw", bw);
-	//Mat result;
-	//cv::adaptiveThreshold(bw, bw, 255, ADAPTIVE_THRESH_GAUSSIAN_C, CV_THRESH_BINARY, 21, 0);
-   // imshow("result", result);
-	/*imshow("result", result);
+	cv::Mat gray_image;
+	cv::Mat edges_image;
+	cv::Mat new_image;
+	std::vector<std::vector<Point>> vtContours;
+	std::vector<Vec4i> vtHierarchy;
+	std::vector<Vec4f> vtLines;
+	int nRows = src.rows;
 
-	cv::imshow("src", invSrc);
-	cv::imshow("dst", bw);
-	cv::waitKey();*/
+	cv::cvtColor(src,gray_image, CV_BGR2GRAY)
+	gray_image =  cv::Scalar::all(255) - gray_image;
+	cv::threshold(gray_image,gray_image,0,255,CV_THRESH_BINARY + CV_THRESH_OTSU);
+
+	// Step 1: Find seperate line. Update later
+	// cv::Canny(gray_image,edges_image, 50,150);
+	// cv::findContours(edges_image,vtContours,vtHierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
+	// auto gray_temp_image = cv::Mat::zeros(gray_image.size(),CV_8UC1);
+	// for (auto&& cnt : vtContours) {
+	// 	if (cv::contourArea(cnt) >= 10){
+	// 		RotatedRect rect = cv::minAreaRect(cv::Mat(cnt))
+	// 		Point2f rect_points[5];
+	// 		std::vector<Point> vtPoints;
 
 
-	//Mat cdst;
-	//cvtColor(bw, cdst, COLOR_GRAY2BGR);
-	//Mat cdstP = cdst.clone();
+	// 		rect.points(rect_points)
+	// 		rect_points[4] = rect_points[0];
+	// 		int index = 0;
+	// 		if (getDistance(rect_points[0],rect_points[1]) >= getDistance(rect_points[1],rect_points[2])){
+	// 			index = 1;
+	// 		}
+	// 		sline line;
+	// 		line.p1 = getMidPoint(rect_points[index],rect_points[index+1]);
+	// 		line.p2 = getMidPoint(rect_points[index+2],rect_points[index+3]);
+	// 		lines.push_back(line);
+	// 	}
+	// }
 
+	// Step 2: find all lines
+	Ptr<LineSegmentDetector> ls = createLineSegmentDetector(LSD_REFINE_STD);
+    
+    // Detect the lines
+    ls->detect(image, vtLines);
+	if (vtLines.size() > 0){
+		for (auto&& line:vtLines){
+			Point2f point1 = Point2f(line[0],line[1]);
+			Point2f point2 = Point2f(line[2],line[3]);
+			auto gray_temp_image = cv::Mat:zeros(src.size(),CV_8UC1);
 
-	 //Standard Hough Line Transform
-	//std::vector<Vec2f> liness; // will hold the results of the detection
-	//HoughLines(bw, liness, 1, CV_PI / 180, 150, 0, 0); // runs the actual detection
-	//												  // Draw the lines
-	//for (size_t i = 0; i < liness.size(); i++)
-	//{
-	//	float rho = liness[i][0], theta = liness[i][1];
-	//	Point pt1, pt2;
-	//	double a = cos(theta), b = sin(theta);
-	//	double x0 = a*rho, y0 = b*rho;
-	//	pt1.x = cvRound(x0 + 1000 * (-b));
-	//	pt1.y = cvRound(y0 + 1000 * (a));
-	//	pt2.x = cvRound(x0 - 1000 * (-b));
-	//	pt2.y = cvRound(y0 - 1000 * (a));
-	//	line(cdst, pt1, pt2, Scalar(0, 0, 255), 1, CV_AA);
-	//}
-    int ih = src.rows;
-    int sizemax =max(ih, src.cols);
-    double minLineLength = 5;
-    double maxLineGap = 0;
-    double lw = 1.0;
-    if (sizemax > 3500) {
-        lw = 3.0;
-        minLineLength = 20;
-        maxLineGap = 2;
-    }
-    else if (sizemax > 2000) {
-        lw = 2.0;
-        minLineLength = 10;
-        maxLineGap = 1;
-    }
+			// The following code helps remove some lines that generate from arc, cricles.
+			cv::line(gray_temp_image,point1,point2,cv::Scalar(255),2);
+			auto before_area = (double)cv::countNonZero(gray_temp_image);
+			cv::bitwise_and(gray_temp_image,gray_image,gray_temp_image);
+			auto after_area = (double)cv::countNonZero(gray_temp_image);
 
-   // cv::imshow("bbbbw", bw);
-
-	// Probabilistic Line Transform
-	vector<Vec4i> linesP; // will hold the results of the detection
-	HoughLinesP(bw, linesP, lw, CV_PI / 180, threshold, minLineLength, maxLineGap); // runs the actual detection
-														// Draw the lines
-	for (size_t i = 0; i < linesP.size(); i++)
-	{
-		Vec4i l = linesP[i];
-		//line(cdstP, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(0, 0, 255), 1, LINE_AA);
-		sline lin;
-
-		lin.p1 = Point2Dd(l[0], ih-l[1]);
-		lin.p2 = Point2Dd(l[2], ih-l[3]);
-		lines.push_back(lin);
+			if (after_area/before_area > 0.15){
+				sline line;
+				line.p1 = Point2Dd(line[0],nRows - line[1]);
+				line.p2 = Point2Dd(line[2],nRows - line[3])
+				lines.push_back(line)
+			}
+		}
 	}
-	// Show results
-	/*imshow("Source", src);
-	imshow("Detected Lines (in red) - Standard Hough Line Transform", cdst);
-	imshow("Detected Lines (in red) - Probabilistic Line Transform", cdstP);
-	imwrite("line1.png", cdstP);
-	imwrite("line0.png", cdst);
-	waitKey(0);*/
+
 }
 
 #else 
