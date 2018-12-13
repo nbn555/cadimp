@@ -18,10 +18,19 @@
 **********************************************************************/
 
 // Include automatically generated configuration file if running autoconf
+
+#include <iostream>
+
+#include "allheaders.h"
+#include "baseapi.h"
+#include "basedir.h"
+#include "dict.h"
+#include "openclwrapper.h"
+#include "osdetect.h"
+#include "renderer.h"
+#include "strngs.h"
+#include "tprintf.h"
 #include "TextDetectorAPI.h"
-#include "opencv2\core\core.hpp"
-#include "opencv2\highgui\highgui.hpp"
-#include "opencv2\imgproc\imgproc.hpp" 
 
 using namespace std;
 using namespace cv;
@@ -440,7 +449,7 @@ bool detectText(Mat &src, vector<pair<string, RotatedRect>> &outText) {
 	// Create Tesseract object
 	tesseract::TessBaseAPI *ocr = new tesseract::TessBaseAPI();
 	// Initialize tesseract to use English (eng) and the LSTM OCR engine. 
-	ocr->Init("..\\", "eng", tesseract::OEM_DEFAULT);
+	ocr->Init("C:\\AAA\\Project\\VS2015_Tesseract-master", "eng", tesseract::OEM_DEFAULT);
 	// Set Page segmentation mode to PSM_AUTO (3)
 	ocr->SetPageSegMode(tesseract::PSM_SINGLE_WORD);
 	ocr->SetVariable("tessedit_char_whitelist", "0123456789abcdefjhijklmnopqrstuvwxyzABCDEFJHIJKLMNOPQRSTUVWXYZ.,+-");

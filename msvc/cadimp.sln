@@ -8,6 +8,10 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libtesseract", "libtesseract\libtesseract.vcxproj", "{D5811ADA-EF79-4F95-A81C-0CAE618C1198}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestTesseract", "TestTesseract\TestTesseract.vcxproj", "{0FCCFBE2-B35F-405F-90A5-8D988F0ADFDB}"
+	ProjectSection(ProjectDependencies) = postProject
+		{451E6D32-3C95-43BE-A319-6C52926CD4C4} = {451E6D32-3C95-43BE-A319-6C52926CD4C4}
+		{D5811ADA-EF79-4F95-A81C-0CAE618C1198} = {D5811ADA-EF79-4F95-A81C-0CAE618C1198}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
