@@ -154,7 +154,7 @@ void getLines(Mat src, std::vector<sline>& lines)
 		for (auto&& segment_line:vtLines){
 			auto point1 = Point2f(segment_line[0],segment_line[1]);
 			auto point2 = Point2f(segment_line[2],segment_line[3]);
-			auto gray_temp_image = cv::Mat:zeros(src.size(),CV_8UC1);
+			cv::Mat gray_temp_image = cv::Mat:zeros(src.size(),CV_8UC1);
 
 			// The following code helps remove some lines that generate from arc, cricles.
 			cv::line(gray_temp_image,point1,point2,cv::Scalar(255),2);
