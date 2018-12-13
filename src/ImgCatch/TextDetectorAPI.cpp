@@ -19,7 +19,12 @@
 
 // Include automatically generated configuration file if running autoconf
 #include "TextDetectorAPI.h"
+#include "opencv2\core\core.hpp"
+#include "opencv2\highgui\highgui.hpp"
+#include "opencv2\imgproc\imgproc.hpp" 
 
+using namespace std;
+using namespace cv;
 #if defined(HAVE_TIFFIO_H) && defined(_WIN32)
 
 #include <tiffio.h>
@@ -366,134 +371,197 @@ void PreloadRenderers(
   }
 }
 
+bool cropByContour(Mat &src, vector<Point2i> &contour, Mat &cropped) {
+	// rect is the RotatedRect (I got it from a contour...)
+	RotatedRect rect = minAreaRect(contour);
+	// matrices we'll use
+	Mat M, rotated;
+	// get angle and size from the bounding box
+	float angle = rect.angle;
+	Size rect_size = rect.size;
+	cout << angle << endl;
+	if ((contour.size() > 4 && rect_size.width < rect_size.height)
+		|| (contour.size() == 4 && rect_size.width > rect_size.height)) {
+		swap(rect_size.width, rect_size.height);
+		if (angle == 0) {
+			angle = -90;
+		}
+		else {
+			angle += 90.0;
+		}
+	}
+
+	//cout << angle << endl;
+	rect_size.width += 2;
+	rect_size.height += 2;
+	// get the rotation matrix
+	M = getRotationMatrix2D(rect.center, angle, 1.0);
+	// perform the affine transformation
+	warpAffine(src, rotated, M, src.size(), INTER_CUBIC);
+	// crop the resulting image
+	getRectSubPix(rotated, rect_size, rect.center, cropped);
+	Mat extendMat(cropped.rows * 2, cropped.cols * 2, CV_8UC3, Scalar::all(255));
+	if (cropped.rows == 0 || cropped.cols == 0)
+	{
+		return false;
+	}
+	cropped.copyTo(extendMat(Rect(cropped.cols / 2, cropped.rows / 2, cropped.cols, cropped.rows)));
+	cropped = extendMat.clone();
+	return true;
+}
+
+void drawRotatedRectangle(cv::Mat& image, RotatedRect &rotatedRectangle)
+{
+	cv::Scalar color = cv::Scalar(0, 0, 255); // white
+
+											  // We take the edges that OpenCV calculated for us
+	cv::Point2f vertices2f[4];
+	rotatedRectangle.points(vertices2f);
+
+	// Convert them so we can use them in a fillConvexPoly
+	cv::Point vertices[4];
+	for (int i = 0; i < 4; ++i) {
+		vertices[i] = vertices2f[i];
+	}
+
+	// Now we can fill the rotated rectangle with our specified color
+	cv::fillConvexPoly(image,
+		vertices,
+		4,
+		color);
+}
+
 /**********************************************************************
  *  main()
  *
  **********************************************************************/
 //
-bool detectText(const char* image, std::vector<tesseract::DetectedText> &detectedTextList) {
-	const char* lang = "eng";
-	const char* outputbase = "test.png";
-	const char* datapath = "..\\";
-	bool list_langs = false;
-	bool print_parameters = false;
-	int arg_i = 1;
-	tesseract::PageSegMode pagesegmode = tesseract::PSM_SPARSE_TEXT;
-	tesseract::OcrEngineMode enginemode = tesseract::OEM_DEFAULT;
-	/* main() calls functions like ParseArgs which call exit().
-	* This results in memory leaks if vars_vec and vars_values are
-	* declared as auto variables (destructor is not called then). */
-	static GenericVector<STRING> vars_vec;
-	static GenericVector<STRING> vars_values;
+bool detectText(Mat &src, vector<pair<string, RotatedRect>> &outText) {
+	// Create Tesseract object
+	tesseract::TessBaseAPI *ocr = new tesseract::TessBaseAPI();
+	// Initialize tesseract to use English (eng) and the LSTM OCR engine. 
+	ocr->Init("..\\", "eng", tesseract::OEM_DEFAULT);
+	// Set Page segmentation mode to PSM_AUTO (3)
+	ocr->SetPageSegMode(tesseract::PSM_SINGLE_WORD);
+	ocr->SetVariable("tessedit_char_whitelist", "0123456789abcdefjhijklmnopqrstuvwxyzABCDEFJHIJKLMNOPQRSTUVWXYZ.,+-");
 
-	//..\images\test.png test.png --tessdata - dir ..\ - l eng - c tessedit_create_txt = 1 - c tessedit_create_pdf = 1 - c tessedit_create_tsv = 1 - c tessedit_create_hocr = 1
-	//ParseArgs(argc, argv, &lang, &image, &outputbase, &datapath, &list_langs,
-	//	&print_parameters, &vars_vec, &vars_values, &arg_i, &pagesegmode,
-	//	&enginemode);
-	bool banner = false;
-	if (outputbase != NULL && strcmp(outputbase, "-") &&
-		strcmp(outputbase, "stdout")) {
-		banner = true;
+
+	double scale = 640.0 / src.size().width;
+	//resize(src, src, cv::Size(), scale, scale);
+	/*namedWindow("Original image", CV_WINDOW_AUTOSIZE);
+	imshow("Original image", src);*/
+	Mat gray, edge, draw;
+	cvtColor(src, gray, CV_BGR2GRAY);
+	Mat blurMat;
+	GaussianBlur(gray, blurMat, Size(5, 5), 0);
+	Mat binaryMat;
+	threshold(gray, binaryMat, 0, 255, cv::THRESH_BINARY_INV + cv::THRESH_OTSU);
+	vector<vector<Point2i>> contours;
+	vector<Vec4i> hierarchy;
+	findContours(binaryMat, contours, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_NONE);
+	vector<RotatedRect> filteredRects;
+	for (size_t i = 0; i < contours.size(); i++)
+	{
+		Mat contourMat = src.clone();
+		drawContours(contourMat, contours, i, Scalar(0, 0, 255), 2);
+		if (hierarchy[i][3] != -1) {
+			continue;
+		}
+		RotatedRect rect = minAreaRect(contours[i]);
+		if (rect.size.width > rect.size.height) {
+			swap(rect.size.width, rect.size.height);
+
+			if (rect.angle == 0) {
+				rect.angle = -90;
+			}
+			else {
+				rect.angle += 90.0;
+			}
+		}
+		if (rect.size.height > src.rows / 30)
+		{
+			continue;
+		}
+		filteredRects.push_back(rect);
 	}
+	//group contours
+	vector<vector<RotatedRect>> groupedRects;
+	while (!filteredRects.empty())
+	{
+		vector<RotatedRect> aRectGroup;
+		aRectGroup.push_back(filteredRects.back());
+		filteredRects.pop_back();
+		RotatedRect *groupedRect, *filteredRect;
 
-	PERF_COUNT_START("Tesseract:main")
+		for (size_t i = 0; i < filteredRects.size(); i++)
+		{
+			filteredRect = &filteredRects[i];
+			for (size_t j = 0; j < aRectGroup.size(); j++)
+			{
+				groupedRect = &aRectGroup[j];
+				if (abs(groupedRect->angle - filteredRect->angle) > 45)
+				{
+					continue;
+				}
 
-	// Call GlobalDawgCache here to create the global DawgCache object before
-	// the TessBaseAPI object. This fixes the order of destructor calls:
-	// first TessBaseAPI must be destructed, DawgCache must be the last object.
-	tesseract::Dict::GlobalDawgCache();
-
-	// Avoid memory leak caused by auto variable when exit() is called.
-	static tesseract::TessBaseAPI api;
-
-	api.SetOutputName(outputbase);
-	int init_failed = api.Init(datapath, lang, enginemode, NULL, 0, &vars_vec, &vars_values, false);
-	if (init_failed) {
-		fprintf(stderr, "Could not initialize tesseract.\n");
-		return EXIT_FAILURE;
+				if (norm(groupedRect->center - filteredRect->center) < (groupedRect->size.width + filteredRect->size.width) * 2)
+				{
+					aRectGroup.push_back(*filteredRect);
+					filteredRects.erase(filteredRects.begin() + i);
+					i--;
+					break;
+				}
+			}
+		}
+		groupedRects.push_back(aRectGroup);
 	}
+	Mat outTextMat = src.clone();
+	for (size_t i = 0; i < groupedRects.size(); i++)
+	{
+		Mat groupedRectMat = src.clone();
+		vector<RotatedRect> aRectGroup = groupedRects[i];
+		vector<Point> wordContour;
+		for (size_t j = 0; j < aRectGroup.size(); j++)
+		{
+			drawRotatedRectangle(groupedRectMat, aRectGroup[j]);
+			cv::Point2f vertices2f[4];
+			aRectGroup[j].points(vertices2f);
 
-	//api.SetVariable("tessedit_create_txt", "1");
-	//api.SetVariable("tessedit_create_pdf", "1");
-	api.SetVariable("tessedit_create_tsv", "1");
-	//api.SetVariable("tessedit_create_hocr", "1");
-
-	if (list_langs) {
-		PrintLangsList(&api);
-		return EXIT_SUCCESS;
-	}
-
-	if (print_parameters) {
-		FILE* fout = stdout;
-		fprintf(stdout, "Tesseract parameters:\n");
-		api.PrintVariables(fout);
-		api.End();
-		return EXIT_SUCCESS;
-	}
-
-	FixPageSegMode(&api, pagesegmode);
-
-	if (pagesegmode == tesseract::PSM_AUTO_ONLY) {
-		int ret_val = EXIT_SUCCESS;
-
-		Pix* pixs = pixRead(image);
-		if (!pixs) {
-			fprintf(stderr, "Cannot open input file: %s\n", image);
-			return 2;
+			// Convert them so we can use them in a fillConvexPoly
+			for (int i = 0; i < 4; ++i) {
+				wordContour.push_back((Point)vertices2f[i]);
+			}
 		}
 
-		api.SetImage(pixs);
 
-		tesseract::Orientation orientation;
-		tesseract::WritingDirection direction;
-		tesseract::TextlineOrder order;
-		float deskew_angle;
-
-		tesseract::PageIterator* it = api.AnalyseLayout();
-		if (it) {
-			it->Orientation(&orientation, &direction, &order, &deskew_angle);
-			tprintf(
-				"Orientation: %d\nWritingDirection: %d\nTextlineOrder: %d\n"
-				"Deskew angle: %.4f\n",
-				orientation, direction, order, deskew_angle);
+		//imshow("groupedRectMat", groupedRectMat);
+		Mat cropped;
+		bool flag = cropByContour(src, wordContour, cropped);
+		if (!flag)
+		{
+			continue;
 		}
-		else {
-			ret_val = EXIT_FAILURE;
+		//imshow("cropped", cropped);
+		string outTextStr;
+		
+		// Set image data
+		ocr->SetImage(cropped.data, cropped.cols, cropped.rows, 3, cropped.step);
+
+		// Run Tesseract OCR on image
+		outTextStr = string(ocr->GetUTF8Text());
+		if (outTextStr.empty())
+		{
+			continue;
 		}
+		// print recognized text
+		cout << outTextStr << endl;
 
-		delete it;
+		putText(outTextMat, outTextStr, wordContour[0], FONT_HERSHEY_SIMPLEX, 1, Scalar(0, 0, 255));
+		outText.push_back(pair<string, RotatedRect>(outTextStr, minAreaRect(wordContour)));
 
-		pixDestroy(&pixs);
-		return ret_val;
+		//waitKey(0);
 	}
 
-	// set in_training_mode to true when using one of these configs:
-	// ambigs.train, box.train, box.train.stderr, linebox, rebox
-	bool b = false;
-	bool in_training_mode =
-	(api.GetBoolVariable("tessedit_ambigs_training", &b) && b) ||
-	(api.GetBoolVariable("tessedit_resegment_from_boxes", &b) && b) ||
-	(api.GetBoolVariable("tessedit_make_boxes_from_boxes", &b) && b);
-
-	// Avoid memory leak caused by auto variable when exit() is called.
-	static tesseract::PointerVector<tesseract::TessResultRenderer> renderers;
-
-	if (in_training_mode) {
-		renderers.push_back(NULL);
-	}
-	else {
-		PreloadRenderers(&api, &renderers, pagesegmode, outputbase);
-	}
-
-	if (!renderers.empty()) {
-		if (banner) PrintBanner();
-		bool succeed = api.ProcessPages(image, NULL, 0, renderers[0]);
-		if (!succeed) {
-			fprintf(stderr, "Error during processing.\n");
-			return EXIT_FAILURE;
-		}
-	}
-	api.GetTextPosition(0, detectedTextList);
-	PERF_COUNT_END
+	imwrite("outTextMat.jpg", outTextMat);
+	return true;
 }
-

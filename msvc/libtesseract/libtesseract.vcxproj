@@ -23,7 +23,6 @@
     <ClCompile Include="..\..\textCatch\tesseract\api\capi.cpp" />
     <ClCompile Include="..\..\textCatch\tesseract\api\pdfrenderer.cpp" />
     <ClCompile Include="..\..\textCatch\tesseract\api\renderer.cpp" />
-    <ClCompile Include="..\..\textCatch\tesseract\api\TextDetectorAPI.cpp" />
     <ClCompile Include="..\..\textCatch\tesseract\ccmain\adaptions.cpp" />
     <ClCompile Include="..\..\textCatch\tesseract\ccmain\applybox.cpp" />
     <ClCompile Include="..\..\textCatch\tesseract\ccmain\control.cpp" />
@@ -281,7 +280,6 @@
     <ClInclude Include="..\..\textCatch\tesseract\api\baseapi.h" />
     <ClInclude Include="..\..\textCatch\tesseract\api\capi.h" />
     <ClInclude Include="..\..\textCatch\tesseract\api\renderer.h" />
-    <ClInclude Include="..\..\textCatch\tesseract\api\TextDetectorAPI.h" />
     <ClInclude Include="..\..\textCatch\tesseract\ccmain\control.h" />
     <ClInclude Include="..\..\textCatch\tesseract\ccmain\cubeclassifier.h" />
     <ClInclude Include="..\..\textCatch\tesseract\ccmain\cube_reco_context.h" />

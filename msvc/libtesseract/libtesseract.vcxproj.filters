@@ -613,9 +613,6 @@
     <ClCompile Include="..\..\textCatch\tesseract\api\renderer.cpp">
       <Filter>Source Files\api</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\textCatch\tesseract\api\TextDetectorAPI.cpp">
-      <Filter>Source Files\api</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\textCatch\tesseract\opencl\openclwrapper.cpp">
       <Filter>Source Files\opencl</Filter>
     </ClCompile>
@@ -1444,9 +1441,6 @@
       <Filter>Source Files\api</Filter>
     </ClInclude>
     <ClInclude Include="..\..\textCatch\tesseract\api\renderer.h">
-      <Filter>Source Files\api</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\textCatch\tesseract\api\TextDetectorAPI.h">
       <Filter>Source Files\api</Filter>
     </ClInclude>
     <ClInclude Include="..\..\textCatch\tesseract\opencl\oclkernels.h">
