@@ -27,6 +27,7 @@ int main(int argc, char** argv) {
     GetCurrentDir(result, sizeof(result));
   //  std::string trainpath = std::string(result);
     setTrainingDataPath(std::string(result));
+    setMinHeightText(5);
 	vector<pair<string, RotatedRect>> outText;
 	detectText(src, outText);
 	return EXIT_SUCCESS;

@@ -38,7 +38,7 @@ using namespace std;
 using namespace cv;
 
 std::string g_traning_data_path;
-
+int g_min_height_text = 5;
 #if defined(HAVE_TIFFIO_H) && defined(_WIN32)
 
 #include <tiffio.h>
@@ -57,6 +57,11 @@ static void Win32WarningHandler(const char* module, const char* fmt,
 
 void setTrainingDataPath(const std::string &str) {
     g_traning_data_path = str;
+}
+
+void setMinHeightText(int h)
+{
+    g_min_height_text = h;
 }
 
 void PrintVersionInfo() {
@@ -500,6 +505,11 @@ bool detectText(Mat &src, vector<pair<string, RotatedRect>> &outText) {
 		{
 			continue;
 		}
+
+        // added by Nghi
+        if(min(rect.size.width,rect.size.height) < g_min_height_text)
+            continue;
+
 		filteredRects.push_back(rect);
 	}
 	//group contours
