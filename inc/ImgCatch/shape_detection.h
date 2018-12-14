@@ -10,17 +10,25 @@
 using namespace cv;
 using namespace std;
 
-struct Point2Dd {
-    double _v[2];
-    Point2Dd() {}
-    Point2Dd(double x, double y) {
+struct Point2dd {
+    union
+    {
+        double _v[2];
+        struct
+        {
+            double x;
+            double y;
+        };
+    };
+    Point2dd() {}
+    Point2dd(double x, double y) {
         _v[0] = x;
         _v[1] = y;
     }
 };
 struct sline {
-    Point2Dd p1;
-    Point2Dd p2;
+    Point2dd p1;
+    Point2dd p2;
 };
 
 struct circle {

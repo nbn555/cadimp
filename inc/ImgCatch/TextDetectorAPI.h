@@ -5,11 +5,8 @@
 
 
 #include "opencv2\core\core.hpp"
-#include "opencv2\highgui\highgui.hpp"
-#include "opencv2\imgproc\imgproc.hpp" 
-
-using namespace std;
-using namespace cv;
 
 
-bool detectText(Mat &im, vector<pair<string, RotatedRect>> &outText);
+//extern std::string g_traning_data_path;
+void setTrainingDataPath(const std::string &str);
+bool detectText(cv::Mat &im, std::vector<std::pair<std::string, cv::RotatedRect>> &outText);

@@ -31,9 +31,14 @@
 #include "strngs.h"
 #include "tprintf.h"
 #include "TextDetectorAPI.h"
+#include "opencv2\highgui\highgui.hpp"
+#include "opencv2\imgproc\imgproc.hpp"
 
 using namespace std;
 using namespace cv;
+
+std::string g_traning_data_path;
+
 #if defined(HAVE_TIFFIO_H) && defined(_WIN32)
 
 #include <tiffio.h>
@@ -49,6 +54,10 @@ static void Win32WarningHandler(const char* module, const char* fmt,
 }
 
 #endif /* HAVE_TIFFIO_H &&  _WIN32 */
+
+void setTrainingDataPath(const std::string &str) {
+    g_traning_data_path = str;
+}
 
 void PrintVersionInfo() {
   char* versionStrP;
@@ -449,7 +458,7 @@ bool detectText(Mat &src, vector<pair<string, RotatedRect>> &outText) {
 	// Create Tesseract object
 	tesseract::TessBaseAPI *ocr = new tesseract::TessBaseAPI();
 	// Initialize tesseract to use English (eng) and the LSTM OCR engine. 
-	ocr->Init("C:\\AAA\\Project\\VS2015_Tesseract-master", "eng", tesseract::OEM_DEFAULT);
+	ocr->Init(g_traning_data_path.c_str(), "eng", tesseract::OEM_DEFAULT);
 	// Set Page segmentation mode to PSM_AUTO (3)
 	ocr->SetPageSegMode(tesseract::PSM_SINGLE_WORD);
 	ocr->SetVariable("tessedit_char_whitelist", "0123456789abcdefjhijklmnopqrstuvwxyzABCDEFJHIJKLMNOPQRSTUVWXYZ.,+-");
