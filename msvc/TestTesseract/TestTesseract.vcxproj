@@ -93,7 +93,7 @@
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>../../lib;..\..\vendor\giflib\lib;..\..\vendor\jbig2enc\lib;..\..\vendor\libjpeg\lib;..\..\vendor\liblept\lib;..\..\vendor\libpng\lib;..\..\vendor\libtiff\lib;..\..\vendor\zlib\lib;..\..\vendor\opencv\lib;..\..\vendor\openjpeg\lib;..\..\vendor\libwebp\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>zlib.lib;openjpeg.lib;libwebp.lib;libtiff.lib;libpng.lib;liblept.lib;libjpeg.lib;giflib.lib;opencv_world341d.lib;libtesseractd.lib;ImgCatchd.lib</AdditionalDependencies>
+      <AdditionalDependencies>zlib.lib;openjpeg.lib;libwebp.lib;libtiff.lib;libpng.lib;libjpeg.lib;giflib.lib;libleptd.lib;opencv_world341d.lib;libtesseractd.lib;ImgCatchd.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
