@@ -394,31 +394,30 @@ void PreloadRenderers(
   }
 }
 
-bool cropByContour(Mat &src, vector<Point2i> &contour, Mat &cropped) {
+bool cropByContour(Mat &src, vector<Point2i> &contour, Mat &cropped, RotatedRect &rect) {
 	// rect is the RotatedRect (I got it from a contour...)
-	RotatedRect rect = minAreaRect(contour);
+	rect = minAreaRect(contour);
 	// matrices we'll use
 	Mat M, rotated;
 	// get angle and size from the bounding box
-	float angle = rect.angle;
 	Size rect_size = rect.size;
-	cout << angle << endl;
+	cout << rect.angle << endl;
 	if ((contour.size() > 4 && rect_size.width < rect_size.height)
 		|| (contour.size() == 4 && rect_size.width > rect_size.height)) {
-		swap(rect_size.width, rect_size.height);
-		if (angle == 0) {
-			angle = -90;
+		if (rect.angle == 0) {
+			rect.angle = -90;
 		}
 		else {
-			angle += 90.0;
+			rect.angle += 90.0;
 		}
+		swap(rect_size.width, rect_size.height);
 	}
 
 	//cout << angle << endl;
 	rect_size.width += 2;
 	rect_size.height += 2;
 	// get the rotation matrix
-	M = getRotationMatrix2D(rect.center, angle, 1.0);
+	M = getRotationMatrix2D(rect.center, rect.angle, 1.0);
 	// perform the affine transformation
 	warpAffine(src, rotated, M, src.size(), INTER_CUBIC);
 	// crop the resulting image
@@ -564,7 +563,8 @@ bool detectText(Mat &src, vector<pair<string, RotatedRect>> &outText) {
 
 		//imshow("groupedRectMat", groupedRectMat);
 		Mat cropped;
-		bool flag = cropByContour(src, wordContour, cropped);
+		RotatedRect rect;
+		bool flag = cropByContour(src, wordContour, cropped, rect);
 		if (!flag)
 		{
 			continue;
@@ -585,7 +585,7 @@ bool detectText(Mat &src, vector<pair<string, RotatedRect>> &outText) {
 		cout << outTextStr << endl;
 
 		putText(outTextMat, outTextStr, wordContour[0], FONT_HERSHEY_SIMPLEX, 1, Scalar(0, 0, 255));
-		outText.push_back(pair<string, RotatedRect>(outTextStr, minAreaRect(wordContour)));
+		outText.push_back(pair<string, RotatedRect>(outTextStr, rect));
 
 		//waitKey(0);
 	}
