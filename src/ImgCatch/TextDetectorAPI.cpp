@@ -400,10 +400,9 @@ bool cropByContour(Mat &src, vector<Point2i> &contour, Mat &cropped, RotatedRect
 	// matrices we'll use
 	Mat M, rotated;
 	// get angle and size from the bounding box
-	Size rect_size = rect.size;
 	cout << rect.angle << endl;
-	if ((contour.size() > 4 && rect_size.width < rect_size.height)
-		|| (contour.size() == 4 && rect_size.width > rect_size.height)) {
+	if ((contour.size() > 4 && rect.size.width < rect.size.height)
+		|| (contour.size() == 4 && rect.size.width > rect.size.height)) {
 		if (rect.angle == 0) {
 			rect.angle = -90;
 		}
@@ -412,7 +411,7 @@ bool cropByContour(Mat &src, vector<Point2i> &contour, Mat &cropped, RotatedRect
 		}
 		swap(rect.size.width, rect.size.height);
 	}
-
+	Size2f rect_size = rect.size;
 	//cout << angle << endl;
 	rect_size.width += 2;
 	rect_size.height += 2;
