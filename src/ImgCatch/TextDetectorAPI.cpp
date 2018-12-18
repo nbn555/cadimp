@@ -410,7 +410,7 @@ bool cropByContour(Mat &src, vector<Point2i> &contour, Mat &cropped, RotatedRect
 		else {
 			rect.angle += 90.0;
 		}
-		swap(rect_size.width, rect_size.height);
+		swap(rect.size.width, rect.size.height);
 	}
 
 	//cout << angle << endl;
