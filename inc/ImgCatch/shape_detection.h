@@ -2,6 +2,7 @@
 #define ICAD_SHAPEDETECTION_H
 
 #include <opencv2/opencv.hpp>
+#include <opencv2/ximgproc.hpp>
 #include "opencv2/imgcodecs.hpp"
 #include "opencv2/highgui.hpp"
 #include "opencv2/imgproc.hpp"
