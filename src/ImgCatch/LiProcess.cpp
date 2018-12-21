@@ -1,35 +1,8 @@
 #include"LiProcess.h"
 
+#include "opencv2\highgui\highgui.hpp"
+#include "opencv2\imgproc\imgproc.hpp"
 
-void detectLines(Mat src, vector<Vec4i> &lines)
-{
-    cv::Mat bw;
-   // imshow("source", invSrc);
-   // GaussianBlur(src, src, Size(3, 3), 1, 1);
-    //imshow("source blur", invSrc);
-    cv::cvtColor(src, bw, CV_BGR2GRAY);
-    bw = cv::Scalar::all(255) - bw;
-    cv::threshold(bw, bw, 30, 255, CV_THRESH_BINARY + CV_THRESH_OTSU);
-  //  Mat cany;
-    //cv::adaptiveThreshold(bw, result, 255, ADAPTIVE_THRESH_GAUSSIAN_C, CV_THRESH_BINARY, 23, 0);
- //   Canny(bw, cany, 30, 180);
-  //  imshow("bw", bw);
-
-  //  cv::imshow("cany", cany);
-    //cv::imshow("dst", bw);
-    //cv::waitKey();
-    cv::Mat bw1;
-    //addWeighted(bw,1,cany,1,1,bw1);
-  //  bitwise_or(bw, cany, bw1);
-  //  imshow("bw1", bw1);
-    int ih = src.rows;
-    double lw = 1.0;
-    if (ih > 1000)
-        lw = 1.0;
-
-    HoughLinesP(bw, lines, lw, CV_PI / 160, 25, 5, 1); // runs the actual detection
-                                                         // Draw the lines
-}
 
 void detectCircle(Mat &src, vector<Vec3f> &outCircles) {
 	if (!src.data)

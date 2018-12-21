@@ -3,13 +3,11 @@
 
 #include"preprocessing.h"
 #include "opencv2\core\core.hpp"
-#include "opencv2\highgui\highgui.hpp"
-#include "opencv2\imgproc\imgproc.hpp"
+
 using namespace cv;
 
 //#define  SHOW_IMAGE_TO_DEBUG
 ///// track_point//////////
-void detectLines(Mat src, vector<Vec4i> &lines);
 void detectCircle(Mat &src, vector<Vec3f> &outCircles);
 void CreateIntMatrix(int **&matrix, CvSize size);
 void ReleaseIntMatrix(int **&matrix, int size);

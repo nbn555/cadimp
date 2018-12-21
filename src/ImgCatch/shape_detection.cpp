@@ -1,6 +1,11 @@
 #include "shape_detection.h"
 #include <math.h>
-
+#include "opencv2/imgcodecs.hpp"
+#include "opencv2/highgui.hpp"
+#include "opencv2/imgproc.hpp"
+using namespace cv;
+using namespace std;
+//#include <opencv2/ximgproc.hpp>
 void thinningIteration(cv::Mat &img, int iter)
 {
 	CV_Assert(img.channels() == 1);
@@ -114,7 +119,7 @@ cv::Point2f getMidPoint(const cv::Point2f &p1, const cv::Point2f &p2)
 	return mid_point;
 }
 
-void getLines(Mat src, std::vector<sline> &lines)
+void detectLines(Mat src, vector<Vec4i> &lines)
 {
 	cv::Mat gray_image(src.size(), CV_8UC1, cv::Scalar(0));
 	cv::Mat edges_image(src.size(), CV_8UC1, cv::Scalar(0));
@@ -159,14 +164,18 @@ void getLines(Mat src, std::vector<sline> &lines)
 				vtCnt.push_back(vtRectCnt);
 				cv::drawContours(temp_image, vtCnt, 0, cv::Scalar(255), -1);
 
-				sline l;
 				auto p1 = getMidPoint(rect_points[index], rect_points[index + 1]);
 				auto p2 = getMidPoint(rect_points[index + 2], rect_points[(index + 3) % 4]);
+#if 0
+				sline l;
 				l.p1.x = p1.x;
 				l.p1.y = nRows - p1.y;
 				l.p2.x = p2.x;
 				l.p2.y = nRows - p2.y;
 				lines.push_back(l);
+#else
+                lines.push_back(Vec4i(p1.x,p1.y,p2.x,p2.y));
+#endif
 			}
 		}
 		// Remove detected lines
@@ -178,10 +187,12 @@ void getLines(Mat src, std::vector<sline> &lines)
 		std::vector<cv::Vec4i> vtlines;
 		cv::Mat gray_temp_image(gray_image.size(), gray_image.type(), Scalar(0));
 
-		cv::ximgproc::thinning(gray_image, temp_image);
+//		cv::ximgproc::thinning(gray_image, temp_image);
+        thinning(gray_image, temp_image);
 		cv::HoughLinesP(temp_image, vtlines, 1, CV_PI / 180, 30, 20, 10);
 		if (vtlines.size() > 0)
 		{
+#if 0
 			for (auto &&line : vtlines)
 			{
 				sline l;
@@ -192,6 +203,13 @@ void getLines(Mat src, std::vector<sline> &lines)
 				lines.push_back(l);
 				cv::line(gray_temp_image, cv::Point(line[0], line[1]), cv::Point(line[2], line[3]), cv::Scalar(255), 3);
 			}
+#else
+            lines.insert(lines.end(), vtlines.begin(), vtlines.end());
+            /*for (auto &&line : vtlines)
+            {
+                cv::line(gray_temp_image, cv::Point(line[0], line[1]), cv::Point(line[2], line[3]), cv::Scalar(255), 3);
+            }*/
+#endif
 			// Remove detected lines
 			cv::dilate(gray_temp_image, gray_temp_image, element);
 			cv::bitwise_and(gray_image, gray_temp_image, temp_image);
