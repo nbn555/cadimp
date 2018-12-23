@@ -8,7 +8,11 @@ using namespace cv;
 
 //#define  SHOW_IMAGE_TO_DEBUG
 ///// track_point//////////
-void detectCircle(Mat &src, vector<Vec3f> &outCircles);
+void testFolder(const string &path);
+void detectCircle(Mat &src, vector<Vec3f> &outCircles, string path);
+void detectCircle1(Mat &src, vector<Vec3f> &outCircles);
+void detectCircle2(Mat &src, vector<Vec3f> &outCircles, string path);
+
 void CreateIntMatrix(int **&matrix, CvSize size);
 void ReleaseIntMatrix(int **&matrix, int size);
 void intersection(IplImage *img,CvPoint *point, int &t, int **label,int **tx,int **ty); 

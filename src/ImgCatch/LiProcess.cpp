@@ -2,31 +2,60 @@
 
 #include "opencv2\highgui\highgui.hpp"
 #include "opencv2\imgproc\imgproc.hpp"
+#include "dirent.h"
 
+void testFolder(const string &path) {
+	DIR *pDIR;
+	struct dirent *entry;
+	//Mat original_mat;
+	string full_path;
 
-void detectCircle(Mat &src, vector<Vec3f> &outCircles) {
+	if (pDIR = opendir(path.c_str())) {
+		while (entry = readdir(pDIR)) {
+			if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
+				string newPath = path + "\\" + entry->d_name;
+				if (entry->d_type == DT_DIR) {
+					testFolder(newPath);
+					continue;
+				}
+				Mat src, src_gray;
+
+				/// Read the image
+				src = imread(newPath);
+				if (!src.data)
+				{
+					continue;
+				}
+				vector<Vec3f> outCircles;
+				detectCircle(src, outCircles, newPath);
+			}
+		}
+		closedir(pDIR);
+		delete entry;
+	}
+}
+
+void detectCircle1(Mat &src, vector<Vec3f> &outCircles) {
 	if (!src.data)
 	{
 		return;
 	}
-	Mat resizedMat;
-	double scale = 640.0 / src.size().width;
-	resize(src, resizedMat, cv::Size(), scale, scale);
-	//namedWindow("Original image", CV_WINDOW_AUTOSIZE);
-	//imshow("Original image", src);
-	Mat src_gray;
-	cvtColor(resizedMat, src_gray, CV_BGR2GRAY);
-	Canny(src_gray, src_gray, 50, 150, 3);
 
-	/// Reduce the noise so we avoid false circle detection
-	GaussianBlur(src_gray, src_gray, Size(9, 9), 2, 2);
+	if (src.cols <= 20 || src.rows < 20)
+	{
+		return;
+	}
+
+	int param2 = src.cols > 1000 ? 100 : (src.cols > 200 ? 50 : 30);
+
+	Mat src_gray;
+	cvtColor(src, src_gray, CV_BGR2GRAY);
+	outCircles.clear();
 	vector<Vec3f> circles;
 	int iterator = 0;
 	do
 	{
-		//circles.clear();
-		/// Apply the Hough Transform to find the circles
-		HoughCircles(src_gray, circles, HOUGH_GRADIENT, 1, src_gray.rows / 8, 200, 100, 0, 0);
+		HoughCircles(src_gray, circles, HOUGH_GRADIENT, 1, src_gray.rows / 8, 200, param2, 0, 0);
 
 		/// Draw the circles detected
 		for (size_t i = 0; i < circles.size(); i++)
@@ -38,8 +67,64 @@ void detectCircle(Mat &src, vector<Vec3f> &outCircles) {
 		}
 		iterator++;
 	} while (!circles.empty() && iterator < 10);
+	//for (size_t i = 0; i < outCircles.size(); i++)
+	//{
+	//	/*outCircles[i][0] = outCircles[i][0] / scale;
+	//	outCircles[i][1] = outCircles[i][1] / scale;
+	//	outCircles[i][2] = outCircles[i][2] / scale;*/
+	//	Point center(cvRound(outCircles[i][0]), cvRound(outCircles[i][1]));
+	//	int radius = cvRound(outCircles[i][2]);
+	//	// circle center
+	//	circle(src, center, 3, Scalar(0, 255, 0), -1, 8, 0);
+	//	// circle outline
+	//	circle(src, center, radius, Scalar(0, 0, 255), 9, 8, 0);
+	//}
+	//imshow("src", src);
+	//waitKey(0);
+	/*namedWindow("circles", CV_WINDOW_NORMAL);
+	setWindowProperty("circles", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);*/
+	//path += "circle.jpg";
+	//imwrite(path, src);
+}
 
-	//Scale to original size
+void detectCircle2(Mat &src, vector<Vec3f> &outCircles, string path) {
+	if (!src.data)
+	{
+		return;
+	}
+	Mat resizedMat;
+	double scale = 1720.0 / src.size().width;
+	//resizedMat = src.clone();
+	resize(src, resizedMat, cv::Size(), scale, scale, cv::INTER_AREA);
+	//namedWindow("Original image", CV_WINDOW_AUTOSIZE);
+	//imshow("Original image", src);
+	Mat src_gray;
+	cvtColor(resizedMat, src_gray, CV_BGR2GRAY);
+	Canny(src_gray, src_gray, 50, 150, 3);
+	//namedWindow("src_gray", CV_WINDOW_NORMAL);
+	//setWindowProperty("src_gray", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
+	//imshow("src_gray", src_gray);
+	//waitKey(0);
+	GaussianBlur(src_gray, src_gray, Size(9, 9), 2, 2);
+	outCircles.clear();
+	int iterator = 0;
+	vector<Vec3f> circles;
+	do
+	{
+		circles.clear();
+		/// Apply the Hough Transform to find the circles
+		HoughCircles(src_gray, circles, HOUGH_GRADIENT, 1, src_gray.rows / 40, 200, 100, 0, 0);
+
+		/// Draw the circles detected
+		for (size_t i = 0; i < circles.size(); i++)
+		{
+			outCircles.push_back(circles[i]);
+			Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
+			int radius = cvRound(circles[i][2]);
+			circle(src_gray, center, radius, Scalar::all(0), 15, 8, 0);
+		}
+		iterator++;
+	} while (!circles.empty() && iterator < 10);
 	for (size_t i = 0; i < outCircles.size(); i++)
 	{
 		outCircles[i][0] = outCircles[i][0] / scale;
@@ -50,16 +135,168 @@ void detectCircle(Mat &src, vector<Vec3f> &outCircles) {
 		// circle center
 		circle(src, center, 3, Scalar(0, 255, 0), -1, 8, 0);
 		// circle outline
-		circle(src, center, radius, Scalar(0, 0, 255), 3, 8, 0);
+		circle(src, center, radius, Scalar(0, 0, 255), 9, 8, 0);
 	}
 
 	/// Show your results
-	//namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
-	//imshow("Hough Circle Transform Demo", src);
+	/*namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
+	imshow("Hough Circle Transform Demo", src);
+	waitKey(0);*/
+	//namedWindow("circles", CV_WINDOW_NORMAL);
+	//setWindowProperty("circles", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
+	//imshow("circles", src);
+	/*path += "circle.jpg";
+	imwrite(path, src);*/
 	//waitKey(0);
+
 }
 
+void detectCircle(Mat &src, vector<Vec3f> &outCircles, string path) {
+	if (!src.data)
+	{
+		return;
+	}
+	Mat resizedMat;
+	double scale = 1720.0 / src.size().width;
+	//resizedMat = src.clone();
+	resize(src, resizedMat, cv::Size(), scale, scale, cv::INTER_AREA);
+	//namedWindow("Original image", CV_WINDOW_AUTOSIZE);
+	//imshow("Original image", src);
+	Mat grayMat, cannyMat;
+	cvtColor(resizedMat, grayMat, CV_BGR2GRAY);
+	Canny(grayMat, cannyMat, 50, 150, 3);
+	/*Mat dilateMat;
+	Mat element = getStructuringElement(MORPH_RECT,Size(3, 3),Point(2,2));
+	dilate(cannyMat, dilateMat, element);*/
+	vector<vector<Point>> contours;
+	findContours(cannyMat.clone(), contours, RETR_LIST, CHAIN_APPROX_NONE);
+	Mat contourMat = Mat(cannyMat.size(), CV_8UC1, Scalar::all(0));
+	drawContours(contourMat, contours, -1, Scalar::all(255));
+	Mat blurMat;
+	GaussianBlur(cannyMat, blurMat, Size(9, 9), 2, 2);
+	//imshow("blurMat", blurMat);
+	//imshow("contourMat", contourMat);
+	//waitKey(0);
+	Rect rect;
+	Mat croppedMat;
+	for (size_t i = 0; i < contours.size(); i++)
+	{
+		outCircles.clear();
+		//drawContours(contourMat, contours, i, Scalar::all(255));
 
+		rect = minAreaRect(contours[i]).boundingRect();
+		rect.width += 40;
+		rect.height += 40;
+		rect.x -= 20;
+		rect.y -= 20;
+		if (rect.x <0)
+		{
+			rect.x = 0;
+		}
+		if (rect.x + rect.width > blurMat.cols - 1)
+		{
+			rect.width = blurMat.cols - rect.x - 1;
+		}
+
+		if (rect.y <0)
+		{
+			rect.y = 0;
+		}
+		if (rect.y + rect.height > blurMat.rows - 1)
+		{
+			rect.height = blurMat.rows - rect.y - 1;
+		}
+		if (rect.width < 50 || rect.height < 50)
+		{
+			continue;
+		}
+		/*imshow("contourMat", contourMat);
+		waitKey(0);*/
+		croppedMat = blurMat(rect).clone();
+		/// Reduce the noise so we avoid false circle detection
+		string croppedName = std::to_string(i) + ".jpg";
+		cvtColor(croppedMat, croppedMat, CV_GRAY2BGR);
+		//imwrite(croppedName, croppedMat);
+		vector<Vec3f> circles;
+		detectCircle1(croppedMat, circles);
+		int iterator = 0;
+		//do
+		//{
+		//	//circles.clear();
+		//	/// Apply the Hough Transform to find the circles
+		//	HoughCircles(croppedMat, circles, HOUGH_GRADIENT, 1, croppedMat.rows / 40, 200, 100, 0, 0);
+
+		//	/// Draw the circles detected
+		//	for (size_t i = 0; i < circles.size(); i++)
+		//	{
+		//		outCircles.push_back(circles[i]);
+		//		Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
+		//		int radius = cvRound(circles[i][2]);
+		//		circle(croppedMat, center, radius, Scalar::all(0), 15, 8, 0);
+		//	}
+		//	iterator++;
+		//} while (!circles.empty() && iterator < 10);
+		//namedWindow("src_gray", CV_WINDOW_NORMAL);
+		//setWindowProperty("src_gray", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
+		//imshow("src_gray", src_gray);
+		//waitKey(0);
+		//Scale to original size
+
+		for (size_t i = 0; i < circles.size(); i++)
+		{
+
+			Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
+			int radius = cvRound(circles[i][2]);
+			//// circle center
+			//circle(croppedMat, center, 3, Scalar(0, 255, 0), -1, 8, 0);
+			//// circle outline
+			//circle(croppedMat, center, radius, Scalar(0, 0, 255), 9, 8, 0);
+			Mat croppedCannyMat = cannyMat(rect).clone();
+			Mat circleMat(croppedCannyMat.size(), CV_8UC1, Scalar::all(0));
+			circle(circleMat, center, radius, Scalar::all(255));
+			int circleLength = countNonZero(circleMat);
+			Mat dilateMat;
+			Mat element = getStructuringElement(MORPH_RECT, Size(3, 3), Point(2, 2));
+			dilate(croppedCannyMat, dilateMat, element);
+			erode(dilateMat, dilateMat, element);
+			//imshow("circleMat", circleMat);
+			bitwise_and(circleMat, dilateMat, circleMat);
+			/*imshow("dilateMat", dilateMat);
+			imshow("bitwise_and", circleMat);
+			waitKey(0);*/
+			int innerCircleLength = countNonZero(circleMat);
+			float innerCircleRatio = (float)innerCircleLength / circleLength;
+			if (innerCircleRatio < 0.3)
+			{
+				continue;
+			}
+			circles[i][0] = (rect.x + circles[i][0]) / scale;
+			circles[i][1] = (rect.y + circles[i][1]) / scale;
+			circles[i][2] = circles[i][2] / scale;
+			outCircles.push_back(circles[i]);
+			center = Point(cvRound(circles[i][0]), cvRound(circles[i][1]));
+			radius = cvRound(circles[i][2]);
+			// circle center
+			circle(src, center, 3, Scalar(0, 255, 0), -1, 8, 0);
+			// circle outline
+			circle(src, center, radius, Scalar(0, 0, 255), 9, 8, 0);
+		}
+
+		/// Show your results
+		/*namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
+		imshow("Hough Circle Transform Demo", src);
+		waitKey(0);*/
+		/*namedWindow("circles", CV_WINDOW_NORMAL);
+		setWindowProperty("circles", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);*/
+		/*imshow("circles", croppedMat);
+		string circleName = std::to_string(i) + "circle.jpg";
+		imwrite(circleName, croppedMat);*/
+		//waitKey(0);
+	}
+	path += "circles.jpg";
+	imwrite(path, src);
+
+}
 // khoi tao ma tran 2 chieu kich thuoc size
 void CreateIntMatrix(int **&matrix, CvSize size) {
 	matrix = new int*[size.height];
