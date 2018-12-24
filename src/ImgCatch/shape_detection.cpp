@@ -103,6 +103,45 @@ void thinning(const cv::Mat &src, cv::Mat &dst)
 	dst *= 255;
 }
 
+void getIntersections(Mat src, std::vector<cv::Point>& vtIntersectionPoints) {
+	cv::Mat gray_image(src.size(), CV_8UC1, cv::Scalar(0));
+	cv::Mat density(src.size(), CV_8UC1, cv::Scalar(0));
+	cv::Mat thinning_image(src.size(), CV_8UC1, Scalar(0));
+	cv::Mat kernel(3, 3, CV_8UC1, Scalar(1));
+	std::vector<std::vector<Point>> vtContours;
+	std::vector<Vec4i> vtHierarchy;
+	auto nRows = src.rows;
+
+	if (src.channels() > 1) {
+		cv::cvtColor(src, gray_image, COLOR_BGR2GRAY);
+		gray_image = cv::Scalar::all(255) - gray_image;
+		cv::threshold(gray_image, gray_image, 0, 255, CV_THRESH_BINARY + CV_THRESH_OTSU);
+	}
+	else {
+		gray_image = src;
+	}
+
+	thinning(gray_image, thinning_image);
+	//cv::ximgproc::thinning(gray_image, thinning_image, cv::ximgproc::THINNING_GUOHALL);
+	cv::filter2D(thinning_image / 255, density, -1, kernel);
+	cv::threshold(density, density, 3, 255, CV_THRESH_BINARY);
+	cv::findContours(density, vtContours, vtHierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+	for (auto && cnt : vtContours) {
+		if (cnt.size() == 1) {
+			vtIntersectionPoints.push_back(cnt[0]);
+		}
+		else {
+			auto moment = cv::moments(cnt);
+			if (moment.m00 != 0.0) {
+				cv::Point point;
+				point.x = int(moment.m10 / moment.m00);
+				point.y = int(nRows - (moment.m01 / moment.m00));
+				vtIntersectionPoints.push_back(point);
+			}
+		}
+	}
+}
+
 #if 1
 // Calculate distance between 2 points
 double getDistance(const Point2f &point1, const Point2f &point2)
