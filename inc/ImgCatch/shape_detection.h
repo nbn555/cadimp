@@ -5,6 +5,6 @@
 #include <vector>
 
 void detectLines(cv::Mat src, std::vector<cv::Vec4i> &lines);
-void getIntersections(Mat src, std::vector<cv::Point>& vtIntersectionPoints);
+void getIntersections(cv::Mat src, std::vector<cv::Point>& vtIntersectionPoints);
 
 #endif
