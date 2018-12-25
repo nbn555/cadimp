@@ -37,14 +37,14 @@ void removeBorder(Mat& src, Mat &removedBorderMat) {
 			continue;
 		}
 		
-		src(rect).copyTo(removedBorderMat);
+		src(rect).copyTo(removedBorderMat(rect));
 
-		//Mat contourMat = src.clone();
-		//drawContours(contourMat, contours, i, Scalar(0, 0, 255), 5);
-		//namedWindow("contourMat", CV_WINDOW_NORMAL);
-		//setWindowProperty("contourMat", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
-		//imshow("contourMat", removedBorderMat);
-		//waitKey();
+	/*	Mat contourMat = src.clone();
+		drawContours(contourMat, contours, i, Scalar(0, 0, 255), 5);
+		namedWindow("contourMat", CV_WINDOW_NORMAL);
+		setWindowProperty("contourMat", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
+		imshow("contourMat", removedBorderMat);
+		waitKey();*/
 		return;
 		//imwrite("removedMat.jpg", contourMat);
 	}
