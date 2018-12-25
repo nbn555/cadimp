@@ -44,7 +44,6 @@ void removeBorder(Mat& src, Mat &removedBorderMat) {
 		//drawContours(contourMat, contours, i, Scalar(0, 0, 255), 5);
 		//namedWindow("contourMat", CV_WINDOW_NORMAL);
 		//setWindowProperty("contourMat", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
-		//imshow("contourMat", contourMat/*removedBorderMat*/);
 		//waitKey();
 		return;
 		//imwrite("removedMat.jpg", contourMat);
