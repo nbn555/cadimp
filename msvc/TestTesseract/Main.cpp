@@ -20,7 +20,7 @@ int main(int argc, char** argv) {
 	Mat src, src_gray;
 
 	/// Read the image
-	src = imread("G:\\Nghi\\ImgCatch1\\300 Dpi\\2\\20181219031311074_0003.jpg", 1);
+	src = imread("C:\\Working\\opencv\\ImgCatch\\300 Dpi\\2\\20181219031311074_0003.jpg", 1);
 	if (!src.data)
 	{
 		return -1;

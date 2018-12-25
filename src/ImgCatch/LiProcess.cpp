@@ -15,6 +15,7 @@ void removeBorder(Mat& src, Mat &removedBorderMat) {
 	vector<vector<Point2i>> contours;
 	vector<Vec4i> hierarchy;
 	findContours(binaryMat, contours, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_NONE);
+	removedBorderMat = Mat(src.size(), CV_8UC3, Scalar::all(255));
 	for (size_t i = 0; i < contours.size(); i++)
 	{
 		
@@ -35,15 +36,15 @@ void removeBorder(Mat& src, Mat &removedBorderMat) {
 		if (rect.width <= 0 || rect.x + rect.width >= src.cols || rect.y <= 0 || rect.y + rect.height >= src.rows) {
 			continue;
 		}
-		removedBorderMat = Mat(src.size(), CV_8UC3, Scalar::all(255));
+		
 		src(rect).copyTo(removedBorderMat);
-		/*
-		drawContours(contourMat, contours, i, Scalar(0, 0, 255), 5);
-		Mat contourMat = src.clone();
-		namedWindow("contourMat", CV_WINDOW_NORMAL);
-		setWindowProperty("contourMat", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
-		imshow("contourMat", removedBorderMat);
-		waitKey();*/
+
+		//Mat contourMat = src.clone();
+		//drawContours(contourMat, contours, i, Scalar(0, 0, 255), 5);
+		//namedWindow("contourMat", CV_WINDOW_NORMAL);
+		//setWindowProperty("contourMat", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
+		//imshow("contourMat", removedBorderMat);
+		//waitKey();
 		return;
 		//imwrite("removedMat.jpg", contourMat);
 	}
