@@ -8,6 +8,7 @@ using namespace cv;
 
 //#define  SHOW_IMAGE_TO_DEBUG
 ///// track_point//////////
+void removeBorder(Mat& src, Mat &removedBorderMat);
 void testFolder(const string &path);
 void detectCircle(Mat &src, vector<Vec3f> &outCircles, string path);
 void detectCircle1(Mat &src, vector<Vec3f> &outCircles);

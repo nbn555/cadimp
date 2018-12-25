@@ -4,6 +4,49 @@
 #include "opencv2\imgproc\imgproc.hpp"
 #include "dirent.h"
 
+void removeBorder(Mat& src, Mat &removedBorderMat) {
+	Mat gray;
+	cvtColor(src, gray, CV_BGR2GRAY);
+	Mat blurMat;
+	GaussianBlur(gray, blurMat, Size(5, 5), 0);
+	Mat binaryMat;
+	threshold(gray, binaryMat, 0, 255, cv::THRESH_BINARY_INV + cv::THRESH_OTSU);
+	vector<vector<Point2i>> contours;
+	vector<Vec4i> hierarchy;
+	findContours(binaryMat, contours, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_NONE);
+	for (size_t i = 0; i < contours.size(); i++)
+	{
+		
+		if (hierarchy[i][3] == -1) {
+			continue;
+		}
+		Rect rect = minAreaRect(contours[i]).boundingRect();
+		if (rect.height < 0.8 * src.rows || rect.width < 0.8 * src.cols)
+		{
+			continue;
+		}
+
+		//Erode rectangle
+		rect.x += 10;
+		rect.y += 10;
+		rect.width -= 20;
+		rect.height -= 20;
+		if (rect.width <= 0 || rect.x + rect.width >= src.cols || rect.y <= 0 || rect.y + rect.height >= src.rows) {
+			continue;
+		}
+		removedBorderMat = Mat(src.size(), CV_8UC3, Scalar::all(255));
+		src(rect).copyTo(removedBorderMat);
+		/*
+		drawContours(contourMat, contours, i, Scalar(0, 0, 255), 5);
+		Mat contourMat = src.clone();
+		namedWindow("contourMat", CV_WINDOW_NORMAL);
+		setWindowProperty("contourMat", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
+		imshow("contourMat", removedBorderMat);
+		waitKey();*/
+		return;
+		//imwrite("removedMat.jpg", contourMat);
+	}
+}
 void testFolder(const string &path) {
 	DIR *pDIR;
 	struct dirent *entry;
