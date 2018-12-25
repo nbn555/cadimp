@@ -224,6 +224,7 @@ void detectCircle(Mat &src, vector<Vec3f> &outCircles,vector<Point> intersection
 	{
 		return;
 	}
+	outCircles.clear();
 	Mat resizedMat;
 	double scale = 1720.0 / src.size().width;
 	//resizedMat = src.clone();
@@ -259,7 +260,6 @@ void detectCircle(Mat &src, vector<Vec3f> &outCircles,vector<Point> intersection
 	Mat croppedMat;
 	for (size_t contourId = 0; contourId < contours.size(); contourId++)
 	{
-		outCircles.clear();
 		//drawContours(contourMat, contours, i, Scalar::all(255));
 
 		rect = minAreaRect(contours[contourId]).boundingRect();
