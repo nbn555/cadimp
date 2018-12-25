@@ -164,73 +164,87 @@ void detectLines(Mat src, vector<Vec4i> &lines)
 {
 	cv::Mat gray_image(src.size(), CV_8UC1, cv::Scalar(0));
 	cv::Mat edges_image(src.size(), CV_8UC1, cv::Scalar(0));
+	cv::Mat connected_image(src.size(), CV_8UC1, cv::Scalar(0));
 	int nRows = src.rows;
-	int nNumberOfIteration = 3;
+	//int nNumberOfIteration = 3;
 
 	cv::cvtColor(src, gray_image, CV_BGR2GRAY);
 	gray_image = cv::Scalar::all(255) - gray_image;
 	cv::threshold(gray_image, gray_image, 0, 255, CV_THRESH_BINARY + CV_THRESH_OTSU);
-	cv::GaussianBlur(gray_image, gray_image, cv::Size(3, 3), 0);
-
-	for (auto i = 0; i < nNumberOfIteration; i++)
+	//cv::GaussianBlur(gray_image, gray_image, cv::Size(3, 3), 0);
+	
+	auto nLabels = cv::connectedComponents(gray_image, connected_image);
+	for (auto i = 1; i < nLabels; i++)
 	{
+		cv::Mat dst_image(src.size(), CV_8UC1, cv::Scalar(0));
+		cv::inRange(connected_image, cv::Scalar(i), cv::Scalar(i), dst_image);
+
+		//Step 1: Get all separate lines
 		std::vector<std::vector<Point>> vtContours;
 		std::vector<Vec4i> vtHierarchy;
-		cv::Mat temp_image(gray_image.size(), gray_image.type(), cv::Scalar(0));
+		cv::Mat temp_image(dst_image.size(), dst_image.type(), cv::Scalar(0));
+		bool check = false;
 
-		// Step 1: Get all separate lines
-		cv::Canny(gray_image, edges_image, 50, 150);
-		cv::findContours(edges_image, vtContours, vtHierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
-		auto element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
+		cv::findContours(dst_image, vtContours, vtHierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
 		for (auto &&cnt : vtContours)
 		{
-			auto rect = cv::minAreaRect(cv::Mat(cnt));
-			auto index = 0;
-			cv::Point2f rect_points[4];
-			rect.points(rect_points);
-			if (getDistance(rect_points[0], rect_points[1]) >= getDistance(rect_points[1], rect_points[2]))
+			if (cv::arcLength(cnt, false) >= 5)
 			{
-				index = 1;
-			}
+				auto rect = cv::minAreaRect(cv::Mat(cnt));
+				auto index = 0;
+				cv::Point2f rect_points[4];
+				rect.points(rect_points);
 
-			if (getDistance(rect_points[index], rect_points[index + 1]) < 10.0)
-			{
-				std::vector<cv::Point> vtRectCnt;
-				for (auto &&point : rect_points)
+				if (getDistance(rect_points[0], rect_points[1]) >= getDistance(rect_points[1], rect_points[2]))
 				{
-					vtRectCnt.push_back(cv::Point((int)point.x, (int)point.y));
+					index = 1;
 				}
-				vtRectCnt.push_back(cv::Point((int)rect_points[0].x, (int)rect_points[0].y));
-				std::vector<std::vector<Point>> vtCnt;
-				vtCnt.push_back(vtRectCnt);
-				cv::drawContours(temp_image, vtCnt, 0, cv::Scalar(255), -1);
+				auto dDistance = getDistance(rect_points[index], rect_points[index + 1]);
+				if (dDistance < 7.0 && dDistance >= 1.0)
+				{
+					if (getDistance(rect_points[index], rect_points[index + 1]) < 10.0)
+					{
+						std::vector<cv::Point> vtRectCnt;
+						for (auto &&point : rect_points)
+						{
+							vtRectCnt.push_back(cv::Point((int)point.x, (int)point.y));
+						}
+						vtRectCnt.push_back(cv::Point((int)rect_points[0].x, (int)rect_points[0].y));
+						std::vector<std::vector<Point>> vtCnt;
+						vtCnt.push_back(vtRectCnt);
+						cv::drawContours(temp_image, vtCnt, 0, cv::Scalar(255), -1);
 
-				auto p1 = getMidPoint(rect_points[index], rect_points[index + 1]);
-				auto p2 = getMidPoint(rect_points[index + 2], rect_points[(index + 3) % 4]);
+						check = true;
+						auto p1 = getMidPoint(rect_points[index], rect_points[index + 1]);
+						auto p2 = getMidPoint(rect_points[index + 2], rect_points[(index + 3) % 4]);
 #if 0
-				sline l;
-				l.p1.x = p1.x;
-				l.p1.y = nRows - p1.y;
-				l.p2.x = p2.x;
-				l.p2.y = nRows - p2.y;
-				lines.push_back(l);
+						sline l;
+						l.p1.x = p1.x;
+						l.p1.y = nRows - p1.y;
+						l.p2.x = p2.x;
+						l.p2.y = nRows - p2.y;
+						lines.push_back(l);
 #else
-                lines.push_back(Vec4i(p1.x,p1.y,p2.x,p2.y));
+						lines.push_back(Vec4i(p1.x, p1.y, p2.x, p2.y));
 #endif
+					}
+				}
 			}
 		}
-		// Remove detected lines
-		cv::dilate(temp_image, temp_image, element);
-		cv::bitwise_and(gray_image, temp_image, temp_image);
-		gray_image = gray_image - temp_image;
+
+		if (check)
+		{
+			cv::bitwise_and(dst_image, temp_image, temp_image);
+			dst_image = dst_image - temp_image;
+		}
 
 		// Step 2:
 		std::vector<cv::Vec4i> vtlines;
-		cv::Mat gray_temp_image(gray_image.size(), gray_image.type(), Scalar(0));
+		//cv::Mat gray_temp_image(gray_image.size(), gray_image.type(), Scalar(0));
 
-//		cv::ximgproc::thinning(gray_image, temp_image);
-        thinning(gray_image, temp_image);
-		cv::HoughLinesP(temp_image, vtlines, 1, CV_PI / 180, 30, 20, 10);
+		//		cv::ximgproc::thinning(gray_image, temp_image);
+		//thinning(gray_image, temp_image);
+		cv::HoughLinesP(dst_image, vtlines, 1, CV_PI / 180, 5, 5, 5);
 		if (vtlines.size() > 0)
 		{
 #if 0
@@ -245,18 +259,100 @@ void detectLines(Mat src, vector<Vec4i> &lines)
 				cv::line(gray_temp_image, cv::Point(line[0], line[1]), cv::Point(line[2], line[3]), cv::Scalar(255), 3);
 			}
 #else
-            lines.insert(lines.end(), vtlines.begin(), vtlines.end());
-            /*for (auto &&line : vtlines)
-            {
-                cv::line(gray_temp_image, cv::Point(line[0], line[1]), cv::Point(line[2], line[3]), cv::Scalar(255), 3);
-            }*/
+			lines.insert(lines.end(), vtlines.begin(), vtlines.end());
+			/*for (auto &&line : vtlines)
+			{
+			cv::line(gray_temp_image, cv::Point(line[0], line[1]), cv::Point(line[2], line[3]), cv::Scalar(255), 3);
+			}*/
 #endif
-			// Remove detected lines
-			cv::dilate(gray_temp_image, gray_temp_image, element);
-			cv::bitwise_and(gray_image, gray_temp_image, temp_image);
-			gray_image = gray_image - temp_image;
 		}
 	}
+
+//	for (auto i = 0; i < nNumberOfIteration; i++)
+//	{
+//		std::vector<std::vector<Point>> vtContours;
+//		std::vector<Vec4i> vtHierarchy;
+//		cv::Mat temp_image(gray_image.size(), gray_image.type(), cv::Scalar(0));
+//
+//		// Step 1: Get all separate lines
+//		cv::Canny(gray_image, edges_image, 50, 150);
+//		cv::findContours(edges_image, vtContours, vtHierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
+//		auto element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
+//		for (auto &&cnt : vtContours)
+//		{
+//			auto rect = cv::minAreaRect(cv::Mat(cnt));
+//			auto index = 0;
+//			cv::Point2f rect_points[4];
+//			rect.points(rect_points);
+//			if (getDistance(rect_points[0], rect_points[1]) >= getDistance(rect_points[1], rect_points[2]))
+//			{
+//				index = 1;
+//			}
+//
+//			if (getDistance(rect_points[index], rect_points[index + 1]) < 10.0)
+//			{
+//				std::vector<cv::Point> vtRectCnt;
+//				for (auto &&point : rect_points)
+//				{
+//					vtRectCnt.push_back(cv::Point((int)point.x, (int)point.y));
+//				}
+//				vtRectCnt.push_back(cv::Point((int)rect_points[0].x, (int)rect_points[0].y));
+//				std::vector<std::vector<Point>> vtCnt;
+//				vtCnt.push_back(vtRectCnt);
+//				cv::drawContours(temp_image, vtCnt, 0, cv::Scalar(255), -1);
+//
+//				auto p1 = getMidPoint(rect_points[index], rect_points[index + 1]);
+//				auto p2 = getMidPoint(rect_points[index + 2], rect_points[(index + 3) % 4]);
+//#if 0
+//				sline l;
+//				l.p1.x = p1.x;
+//				l.p1.y = nRows - p1.y;
+//				l.p2.x = p2.x;
+//				l.p2.y = nRows - p2.y;
+//				lines.push_back(l);
+//#else
+//                lines.push_back(Vec4i(p1.x,p1.y,p2.x,p2.y));
+//#endif
+//			}
+//		}
+//		// Remove detected lines
+//		cv::dilate(temp_image, temp_image, element);
+//		cv::bitwise_and(gray_image, temp_image, temp_image);
+//		gray_image = gray_image - temp_image;
+//
+//		// Step 2:
+//		std::vector<cv::Vec4i> vtlines;
+//		cv::Mat gray_temp_image(gray_image.size(), gray_image.type(), Scalar(0));
+//
+////		cv::ximgproc::thinning(gray_image, temp_image);
+//        thinning(gray_image, temp_image);
+//		cv::HoughLinesP(temp_image, vtlines, 1, CV_PI / 180, 30, 20, 10);
+//		if (vtlines.size() > 0)
+//		{
+//#if 0
+//			for (auto &&line : vtlines)
+//			{
+//				sline l;
+//				l.p1.x = line[0];
+//				l.p1.y = nRows - line[1];
+//				l.p2.x = line[2];
+//				l.p2.y = nRows - line[3];
+//				lines.push_back(l);
+//				cv::line(gray_temp_image, cv::Point(line[0], line[1]), cv::Point(line[2], line[3]), cv::Scalar(255), 3);
+//			}
+//#else
+//            lines.insert(lines.end(), vtlines.begin(), vtlines.end());
+//            /*for (auto &&line : vtlines)
+//            {
+//                cv::line(gray_temp_image, cv::Point(line[0], line[1]), cv::Point(line[2], line[3]), cv::Scalar(255), 3);
+//            }*/
+//#endif
+//			// Remove detected lines
+//			cv::dilate(gray_temp_image, gray_temp_image, element);
+//			cv::bitwise_and(gray_image, gray_temp_image, temp_image);
+//			gray_image = gray_image - temp_image;
+//		}
+//	}
 }
 
 #else
