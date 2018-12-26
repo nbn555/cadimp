@@ -1905,10 +1905,10 @@ inline v_float16x4 v_cvt_f16(const v_float32x4& a)
 //! @name Check SIMD support
 //! @{
 //! @brief Check CPU capability of SIMD operation
-static inline bool hasSIMD128()
-{
-    return (CV_CPU_HAS_SUPPORT_SSE2) ? true : false;
-}
+//static inline bool hasSIMD128()
+//{
+//    return (CV_CPU_HAS_SUPPORT_SSE2) ? true : false;
+//}
 
 //! @}
 

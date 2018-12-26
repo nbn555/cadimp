@@ -30,6 +30,9 @@
     <ClInclude Include="..\..\inc\ImgCatch\shape_detection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\inc\ImgCatch\precomp.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\ImgCatch\LiProcess.cpp">
@@ -45,6 +48,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\ImgCatch\shape_detection.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ImgCatch\hough.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -22,32 +22,32 @@
     <ProjectGuid>{451E6D32-3C95-43BE-A319-6C52926CD4C4}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>ImgCatch</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -74,7 +74,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <TargetName>$(ProjectName)d</TargetName>
-    <OutDir>../../lib/</OutDir>
+    <OutDir>../TestTesseract</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -95,7 +95,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>../../inc/ImgCatch;../../vendor/opencv/inc;..\..\textCatch\tesseract\vs2010\port;..\..\textCatch\tesseract\api;..\..\textCatch\tesseract\ccmain;..\..\textCatch\tesseract\ccutil;..\..\textCatch\tesseract\ccstruct;..\..\textCatch\tesseract\classify;..\..\textCatch\tesseract\cube;..\..\textCatch\tesseract\cutil;..\..\textCatch\tesseract\dict;..\..\textCatch\tesseract\neural_networks\runtime;..\..\textCatch\tesseract\textord;..\..\textCatch\tesseract\viewer;..\..\textCatch\tesseract\opencl;..\..\textCatch\tesseract\wordrec;..\..\vendor\liblept;..\..\textCatch\leptonica\src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../inc/ImgCatch;../../vendor/opencv/inc;..\..\textCatch\tesseract\vs2010\port;..\..\textCatch\tesseract\api;..\..\textCatch\tesseract\ccmain;..\..\textCatch\tesseract\ccutil;..\..\textCatch\tesseract\ccstruct;..\..\textCatch\tesseract\classify;..\..\textCatch\tesseract\cube;..\..\textCatch\tesseract\cutil;..\..\textCatch\tesseract\dict;..\..\textCatch\tesseract\neural_networks\runtime;..\..\textCatch\tesseract\textord;..\..\textCatch\tesseract\viewer;..\..\textCatch\tesseract\opencl;..\..\textCatch\tesseract\wordrec;..\..\vendor\liblept;..\..\textCatch\leptonica\src;C:\Working\opencv\opencv-3.4.1\modules\core\include;C:\Working\opencv\opencv-3.4.1\modules\imgproc\src</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -139,11 +139,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\inc\ImgCatch\LiProcess.h" />
+    <ClInclude Include="..\..\inc\ImgCatch\precomp.hpp" />
     <ClInclude Include="..\..\inc\ImgCatch\preprocessing.h" />
     <ClInclude Include="..\..\inc\ImgCatch\shape_detection.h" />
     <ClInclude Include="..\..\inc\ImgCatch\TextDetectorAPI.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\ImgCatch\hough.cpp" />
     <ClCompile Include="..\..\src\ImgCatch\LiProcess.cpp" />
     <ClCompile Include="..\..\src\ImgCatch\preprocessing.cpp" />
     <ClCompile Include="..\..\src\ImgCatch\recognition.cpp" />
