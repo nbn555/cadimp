@@ -143,7 +143,7 @@ void detectCircle2(Mat &src, vector<Vec3f> &outCircles, vector<Point> intersecti
 	double scale = 1720.0 / src.size().width;
 	//resizedMat = src.clone();
 	resize(src, resizedMat, cv::Size(), scale, scale, cv::INTER_AREA);
-	getIntersections(resizedMat, intersectionPoints);
+	getIntersections(resizedMat, intersectionPoints, 1);
 	Mat intersectionPointMat = resizedMat.clone();
 	for (size_t i = 0; i < intersectionPoints.size(); i++)
 	{
@@ -229,7 +229,7 @@ void detectCircle(Mat &src, vector<Vec3f> &outCircles,vector<Point> intersection
 	double scale = 1720.0 / src.size().width;
 	//resizedMat = src.clone();
 	resize(src, resizedMat, cv::Size(), scale, scale, cv::INTER_AREA);
-	getIntersections(resizedMat, intersectionPoints);
+	getIntersections(resizedMat, intersectionPoints, 1);
 	Mat intersectionPointMat = resizedMat.clone();
 	for (size_t i = 0; i < intersectionPoints.size(); i++)
 	{
