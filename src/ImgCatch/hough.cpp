@@ -1627,7 +1627,6 @@ static void HoughCirclesGradient(InputArray _image, OutputArray _circles, std::v
 		}
 	}
 	initCenters = filteredCenters;
-
     int centerCnt = (int)initCenters.size();
     if(centerCnt == 0)
         return;

@@ -30,7 +30,6 @@ int main(int argc, char** argv) {
 	imshow("removed", removedBorderMat);
 	waitKey();
 	vector<Point> intersectionPoints;
-	//getIntersections(removedBorderMat, intersectionPoints);
 	/*
 		for (size_t i = 0; i < intersectionPoints.size(); i++)
 		{
