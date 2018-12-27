@@ -20,7 +20,7 @@ int main(int argc, char** argv) {
 	Mat src, src_gray;
 
 	/// Read the image
-	src = imread("300 Dpi\\2\\20181219031311074_0001.jpg", 1);
+	src = imread("G:\\Nghi\\ImgCatch1\\300 Dpi\\2\\20181219031311074_0003.jpg", 1);
 	if (!src.data)
 	{
 		return -1;
@@ -30,7 +30,7 @@ int main(int argc, char** argv) {
 	imshow("removed", removedBorderMat);
 	waitKey();
 	vector<Point> intersectionPoints;
-	getIntersections(removedBorderMat, intersectionPoints);
+	//getIntersections(removedBorderMat, intersectionPoints);
 	/*
 		for (size_t i = 0; i < intersectionPoints.size(); i++)
 		{
@@ -39,7 +39,7 @@ int main(int argc, char** argv) {
 		imshow("removedBorderMat", removedBorderMat);
 		waitKey();*/
 		vector<Vec3f> outCircles;
-	detectCircle2(removedBorderMat,outCircles, intersectionPoints, "");
+	detectCircle(removedBorderMat,outCircles, intersectionPoints, "");
  //   char result[MAX_PATH];
  //   GetCurrentDir(result, sizeof(result));
  // //  std::string trainpath = std::string(result);

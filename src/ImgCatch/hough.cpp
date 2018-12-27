@@ -1555,7 +1555,7 @@ inline int HoughCircleEstimateRadiusInvoker<NZPointSet>::filterCircles(const Poi
     return nzCount;
 }
 
-static void HoughCirclesGradient(InputArray _image, OutputArray _circles, std::vector<Point> initCenters, float dp, float minDist,
+static void HoughCirclesGradient(InputArray _image, OutputArray _circles, std::vector<Point>& initCenters, float dp, float minDist,
                                  int minRadius, int maxRadius, int cannyThreshold,
                                  int accThreshold, int maxCircles, int kernelSize, bool centersOnly)
 {
@@ -1591,9 +1591,42 @@ static void HoughCirclesGradient(InputArray _image, OutputArray _circles, std::v
 
     // 4 rows when multithreaded because there is a bit overhead
     // and on the other side there are some row ranges where centers are concentrated
-    parallel_for_(Range(1, accum.rows - 1),
+    /*parallel_for_(Range(1, accum.rows - 1),
                   HoughCirclesFindCentersInvoker(accum, initCenters, accThreshold, mtx),
-                  (numThreads > 1) ? ((accum.rows - 2) / 4) : 1);
+                  (numThreads > 1) ? ((accum.rows - 2) / 4) : 1);*/
+	//Find possible circle centers
+	const int* adata = accum.ptr<int>();
+	std::vector<cv::Point> filteredCenters;
+	for (size_t i = 0; i < initCenters.size(); i++)
+	{
+		int blockSize = 10;
+		for (int j = -blockSize; j < blockSize; j+=2)
+		{
+			int y = initCenters[i].y + j;
+			for (int k = -blockSize; k < blockSize; k += 2)
+			{
+				int x = initCenters[i].x + k;
+				if (x <= 0 || y <= 0 || x >= accum.cols -1 || y >= accum.rows -1)
+				{
+					continue;
+				}
+				int base = y * accum.cols + x;
+				int tmp1 = adata[base];
+				int tmp2 = adata[base - 1];
+				int tmp3 = adata[base - accum.cols];
+				int tmp4 = adata[base + 1];
+				int tmp5 = adata[base + accum.cols];
+				if (adata[base] > accThreshold &&
+						adata[base] > adata[base - 1] && adata[base] >= adata[base + 1] &&
+						adata[base] > adata[base - accum.cols] && adata[base] >= adata[base + accum.cols])
+				{
+					filteredCenters.push_back(cv::Point(x, y));
+				}
+				
+			}
+		}
+	}
+	initCenters = filteredCenters;
 
     int centerCnt = (int)initCenters.size();
     if(centerCnt == 0)
@@ -1647,7 +1680,7 @@ static void HoughCirclesGradient(InputArray _image, OutputArray _circles, std::v
     }
 }
 
-static void HoughCircles( InputArray _image, OutputArray _circles, std::vector<Point> initCenters,
+static void HoughCircles( InputArray _image, OutputArray _circles, std::vector<Point> &initCenters,
                           int method, double dp, double minDist,
                           double param1, double param2,
                           int minRadius, int maxRadius,
@@ -1687,7 +1720,7 @@ static void HoughCircles( InputArray _image, OutputArray _circles, std::vector<P
     }
 }
 
-void HoughCircles( InputArray _image, OutputArray _circles, std::vector<Point> initCenters, 
+void HoughCircles( InputArray _image, OutputArray _circles, std::vector<Point>& initCenters, 
                    int method, double dp, double minDist,
                    double param1, double param2,
                    int minRadius, int maxRadius )
