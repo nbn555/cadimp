@@ -60,12 +60,12 @@ struct LinePolar
 
 struct hough_cmp_gt
 {
-    hough_cmp_gt(const int* _aux) : aux(_aux) {}
+    hough_cmp_gt(const Point* _aux) : aux(_aux) {}
     inline bool operator()(int l1, int l2) const
     {
-        return aux[l1] > aux[l2] || (aux[l1] == aux[l2] && l1 < l2);
+        return aux[l1].y > aux[l2].y || (aux[l1].y == aux[l2].y && l1 < l2);
     }
-    const int* aux;
+    const Point* aux;
 };
 
 static void
@@ -1207,7 +1207,7 @@ private:
 class HoughCirclesFindCentersInvoker : public ParallelLoopBody
 {
 public:
-    HoughCirclesFindCentersInvoker(const Mat &_accum, std::vector<int> &_centers, int _accThreshold, Mutex& _mutex) :
+    HoughCirclesFindCentersInvoker(const Mat &_accum, std::vector<Point> &_centers, int _accThreshold, Mutex& _mutex) :
         accum(_accum), centers(_centers), accThreshold(_accThreshold), _lock(_mutex)
     {
         acols = accum.cols;
@@ -1219,44 +1219,44 @@ public:
 
     void operator()(const Range &boundaries) const
     {
-        int startRow = boundaries.start;
-        int endRow = boundaries.end;
-        std::vector<int> centersLocal;
-        bool singleThread = (boundaries == Range(1, accum.rows - 1));
+        //int startRow = boundaries.start;
+        //int endRow = boundaries.end;
+        //std::vector<int> centersLocal;
+        //bool singleThread = (boundaries == Range(1, accum.rows - 1));
 
-        startRow = max(1, startRow);
-        endRow = min(arows - 1, endRow);
+        //startRow = max(1, startRow);
+        //endRow = min(arows - 1, endRow);
 
-        //Find possible circle centers
-        for(int y = startRow; y < endRow; ++y )
-        {
-            int x = 1;
-            int base = y * acols + x;
+        ////Find possible circle centers
+        //for(int y = startRow; y < endRow; ++y )
+        //{
+        //    int x = 1;
+        //    int base = y * acols + x;
 
-            for(; x < acols - 1; ++x, ++base )
-            {
-                if( adata[base] > accThreshold &&
-                    adata[base] > adata[base-1] && adata[base] >= adata[base+1] &&
-                    adata[base] > adata[base-acols] && adata[base] >= adata[base+acols] )
-                    centersLocal.push_back(base);
-            }
-        }
+        //    for(; x < acols - 1; ++x, ++base )
+        //    {
+        //        if( adata[base] > accThreshold &&
+        //            adata[base] > adata[base-1] && adata[base] >= adata[base+1] &&
+        //            adata[base] > adata[base-acols] && adata[base] >= adata[base+acols] )
+        //            centersLocal.push_back(base);
+        //    }
+        //}
 
-        if(!centersLocal.empty())
-        {
-            if(singleThread)
-                centers = centersLocal;
-            else
-            {
-                AutoLock alock(_lock);
-                centers.insert(centers.end(), centersLocal.begin(), centersLocal.end());
-            }
-        }
+        //if(!centersLocal.empty())
+        //{
+        //    if(singleThread)
+        //        centers = centersLocal;
+        //    else
+        //    {
+        //        AutoLock alock(_lock);
+        //        centers.insert(centers.end(), centersLocal.begin(), centersLocal.end());
+        //    }
+        //}
     }
 
 private:
     const Mat &accum;
-    std::vector<int> &centers;
+    std::vector<Point> centers;
     int accThreshold;
 
     int acols, arows;
@@ -1280,16 +1280,16 @@ static bool CheckDistance(const std::vector<Vec3f> &circles, size_t endIdx, cons
     return goodPoint;
 }
 
-static void GetCircleCenters(const std::vector<int> &centers, std::vector<Vec3f> &circles, int acols, float minDist, float dr)
+static void GetCircleCenters(const std::vector<Point> &centers, std::vector<Vec3f> &circles, int acols, float minDist, float dr)
 {
     size_t centerCnt = centers.size();
     float minDist2 = minDist * minDist;
     for (size_t i = 0; i < centerCnt; ++i)
     {
-        int center = centers[i];
-        int y = center / acols;
-        int x = center - y * acols;
-        Vec3f circle = Vec3f((x + 0.5f) * dr, (y + 0.5f) * dr, 0);
+        //int center = centers[i];
+        //int y = center / acols;
+        //int x = center - y * acols;
+        Vec3f circle = Vec3f((centers[i].x + 0.5f) * dr, (centers[i].y + 0.5f) * dr, 0);
 
         bool goodPoint = CheckDistance(circles, circles.size(), circle, minDist2);
         if (goodPoint)
@@ -1317,10 +1317,10 @@ template<class NZPoints>
 class HoughCircleEstimateRadiusInvoker : public ParallelLoopBody
 {
 public:
-    HoughCircleEstimateRadiusInvoker(const NZPoints &_nz, int _nzSz, const std::vector<int> &_centers, std::vector<EstimatedCircle> &_circlesEst,
+    HoughCircleEstimateRadiusInvoker(const NZPoints &_nz, int _nzSz, const std::vector<Point> &initCenters, std::vector<EstimatedCircle> &_circlesEst,
                                      int _acols, int _accThreshold, int _minRadius, int _maxRadius,
                                      float _dp, Mutex& _mutex) :
-        nz(_nz), nzSz(_nzSz), centers(_centers), circlesEst(_circlesEst), acols(_acols), accThreshold(_accThreshold),
+        nz(_nz), nzSz(_nzSz), centers(initCenters), circlesEst(_circlesEst), acols(_acols), accThreshold(_accThreshold),
         minRadius(_minRadius), maxRadius(_maxRadius), dr(_dp), _lock(_mutex)
     {
         minRadius2 = (float)minRadius * minRadius;
@@ -1351,9 +1351,8 @@ protected:
         // Estimate radius and check support
         for(; i < boundaries.end; ++i)
         {
-            int ofs = centers[i];
-            int y = ofs / acols;
-            int x = ofs - y * acols;
+			int y = centers[i].y;
+			int x = centers[i].x;
 
             //Calculate circle's center in pixels
             Point2f curCenter = Point2f((x + 0.5f) * dr, (y + 0.5f) * dr);
@@ -1423,7 +1422,7 @@ protected:
 private:
     const NZPoints &nz;
     int nzSz;
-    const std::vector<int> &centers;
+    const std::vector<Point> &centers;
     std::vector<EstimatedCircle> &circlesEst;
     int acols, accThreshold, minRadius, maxRadius;
     float dr;
@@ -1556,7 +1555,7 @@ inline int HoughCircleEstimateRadiusInvoker<NZPointSet>::filterCircles(const Poi
     return nzCount;
 }
 
-static void HoughCirclesGradient(InputArray _image, OutputArray _circles, float dp, float minDist,
+static void HoughCirclesGradient(InputArray _image, OutputArray _circles, std::vector<Point> initCenters, float dp, float minDist,
                                  int minRadius, int maxRadius, int cannyThreshold,
                                  int accThreshold, int maxCircles, int kernelSize, bool centersOnly)
 {
@@ -1588,26 +1587,26 @@ static void HoughCirclesGradient(InputArray _image, OutputArray _circles, float 
     }
     accumVec.clear();
 
-    std::vector<int> centers;
+    //std::vector<int> centers;
 
     // 4 rows when multithreaded because there is a bit overhead
     // and on the other side there are some row ranges where centers are concentrated
     parallel_for_(Range(1, accum.rows - 1),
-                  HoughCirclesFindCentersInvoker(accum, centers, accThreshold, mtx),
+                  HoughCirclesFindCentersInvoker(accum, initCenters, accThreshold, mtx),
                   (numThreads > 1) ? ((accum.rows - 2) / 4) : 1);
 
-    int centerCnt = (int)centers.size();
+    int centerCnt = (int)initCenters.size();
     if(centerCnt == 0)
         return;
 
-    std::sort(centers.begin(), centers.end(), hough_cmp_gt(accum.ptr<int>()));
+    //std::sort(initCenters.begin(), initCenters.end(), hough_cmp_gt(accum.ptr<Point>()));
 
     std::vector<Vec3f> circles;
     circles.reserve(256);
     if (centersOnly)
     {
         // Just get the circle centers
-        GetCircleCenters(centers, circles, accum.cols, minDist, dp);
+        GetCircleCenters(initCenters, circles, accum.cols, minDist, dp);
     }
     else
     {
@@ -1619,7 +1618,7 @@ static void HoughCirclesGradient(InputArray _image, OutputArray _circles, float 
             nz.toList(nzList);
             // One loop iteration per thread if multithreaded.
             parallel_for_(Range(0, centerCnt),
-                HoughCircleEstimateRadiusInvoker<NZPointList>(nzList, nzSz, centers, circlesEst, accum.cols,
+                HoughCircleEstimateRadiusInvoker<NZPointList>(nzList, nzSz, initCenters, circlesEst, accum.cols,
                     accThreshold, minRadius, maxRadius, dp, mtx),
                 numThreads);
         }
@@ -1628,7 +1627,7 @@ static void HoughCirclesGradient(InputArray _image, OutputArray _circles, float 
             // Faster to use a matrix
             // One loop iteration per thread if multithreaded.
             parallel_for_(Range(0, centerCnt),
-                HoughCircleEstimateRadiusInvoker<NZPointSet>(nz, nzSz, centers, circlesEst, accum.cols,
+                HoughCircleEstimateRadiusInvoker<NZPointSet>(nz, nzSz, initCenters, circlesEst, accum.cols,
                     accThreshold, minRadius, maxRadius, dp, mtx),
                 numThreads);
         }
@@ -1648,7 +1647,7 @@ static void HoughCirclesGradient(InputArray _image, OutputArray _circles, float 
     }
 }
 
-static void HoughCircles( InputArray _image, OutputArray _circles,
+static void HoughCircles( InputArray _image, OutputArray _circles, std::vector<Point> initCenters,
                           int method, double dp, double minDist,
                           double param1, double param2,
                           int minRadius, int maxRadius,
@@ -1679,7 +1678,7 @@ static void HoughCircles( InputArray _image, OutputArray _circles,
     switch( method )
     {
     case CV_HOUGH_GRADIENT:
-        HoughCirclesGradient(_image, _circles, (float)dp, (float)minDist,
+        HoughCirclesGradient(_image, _circles, initCenters, (float)dp, (float)minDist,
                              minRadius, maxRadius, cannyThresh,
                              accThresh, maxCircles, kernelSize, centersOnly);
         break;
@@ -1688,15 +1687,14 @@ static void HoughCircles( InputArray _image, OutputArray _circles,
     }
 }
 
-void HoughCircles( InputArray _image, OutputArray _circles,
+void HoughCircles( InputArray _image, OutputArray _circles, std::vector<Point> initCenters, 
                    int method, double dp, double minDist,
                    double param1, double param2,
                    int minRadius, int maxRadius )
 {
-    HoughCircles(_image, _circles, method, dp, minDist, param1, param2, minRadius, maxRadius, -1, 3);
+    HoughCircles(_image, _circles, initCenters, method, dp, minDist, param1, param2, minRadius, maxRadius, -1, 3);
 }
 } // \namespace cv
-
 
 /* Wrapper function for standard hough transform */
 //CV_IMPL CvSeq*
@@ -1812,7 +1810,7 @@ void HoughCircles( InputArray _image, OutputArray _circles,
 
 
 CV_IMPL CvSeq*
-cvHoughCircles( CvArr* src_image, void* circle_storage,
+cvHoughCircles( CvArr* src_image, void* circle_storage, std::vector<cv::Point> initCenters,
                 int method, double dp, double min_dist,
                 double param1, double param2,
                 int min_radius, int max_radius )
@@ -1848,7 +1846,7 @@ cvHoughCircles( CvArr* src_image, void* circle_storage,
         cvClearSeq( circles );
     }
 
-    cv::HoughCircles(src, circles_mat, method, dp, min_dist, param1, param2, min_radius, max_radius, circles_max, 3);
+    cv::HoughCircles(src, circles_mat, initCenters, method, dp, min_dist, param1, param2, min_radius, max_radius, circles_max, 3);
     cvSeqPushMulti(circles, circles_mat.data, (int)circles_mat.total());
     return circles;
 }

@@ -955,7 +955,7 @@ CVAPI(CvSeq*)  cvHoughLines2( CvArr* image, void* line_storage, int method,
 /** @brief Finds circles in the image
 @see cv::HoughCircles
 */
-CVAPI(CvSeq*) cvHoughCircles( CvArr* image, void* circle_storage,
+CVAPI(CvSeq*) cvHoughCircles( CvArr* image, void* circle_storage, std::vector<cv::Point> initCenters,
                               int method, double dp, double min_dist,
                               double param1 CV_DEFAULT(100),
                               double param2 CV_DEFAULT(100),

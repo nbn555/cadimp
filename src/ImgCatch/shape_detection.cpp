@@ -125,6 +125,8 @@ void getIntersections(Mat src, std::vector<cv::Point>& vtIntersectionPoints) {
 	//cv::ximgproc::thinning(gray_image, thinning_image, cv::ximgproc::THINNING_GUOHALL);
 	cv::filter2D(thinning_image / 255, density, -1, kernel);
 	cv::threshold(density, density, 3, 255, CV_THRESH_BINARY);
+	imshow("density", density);
+	waitKey();
 	cv::findContours(density, vtContours, vtHierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
 	for (auto && cnt : vtContours) {
 		if (cnt.size() == 1) {
@@ -135,7 +137,7 @@ void getIntersections(Mat src, std::vector<cv::Point>& vtIntersectionPoints) {
 			if (moment.m00 != 0.0) {
 				cv::Point point;
 				point.x = int(moment.m10 / moment.m00);
-				point.y = int(nRows - (moment.m01 / moment.m00));
+				point.y = int((moment.m01 / moment.m00));
 				vtIntersectionPoints.push_back(point);
 			}
 		}

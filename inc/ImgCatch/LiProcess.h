@@ -10,9 +10,9 @@ using namespace cv;
 ///// track_point//////////
 void removeBorder(Mat& src, Mat &removedBorderMat);
 void testFolder(const string &path);
-void detectCircle(Mat &src, vector<Vec3f> &outCircles, string path);
-void detectCircle1(Mat &src, vector<Vec3f> &outCircles);
-void detectCircle2(Mat &src, vector<Vec3f> &outCircles, string path);
+void detectCircle(Mat &src, vector<Vec3f> &outCircles, vector<Point> intersectionPoints, string path);
+void detectCircle1(Mat &src, vector<Point> intersectionPoints, vector<Vec3f> &outCircles);
+void detectCircle2(Mat &src, vector<Vec3f> &outCircles, vector<Point> intersectionPoints, string path);
 
 void CreateIntMatrix(int **&matrix, CvSize size);
 void ReleaseIntMatrix(int **&matrix, int size);

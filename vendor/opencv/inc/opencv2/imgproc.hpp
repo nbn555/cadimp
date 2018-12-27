@@ -44,6 +44,7 @@
 #define OPENCV_IMGPROC_HPP
 
 #include "opencv2/core.hpp"
+#include <vector>
 
 /**
   @defgroup imgproc Image processing
@@ -2169,6 +2170,11 @@ CV_EXPORTS_W void HoughCircles( InputArray image, OutputArray circles,
                                int method, double dp, double minDist,
                                double param1 = 100, double param2 = 100,
                                int minRadius = 0, int maxRadius = 0 );
+
+CV_EXPORTS_W void HoughCircles(InputArray image, OutputArray circles, std::vector<Point> initCenters,
+	int method, double dp, double minDist,
+	double param1 = 100, double param2 = 100,
+	int minRadius = 0, int maxRadius = 0);
 
 //! @} imgproc_feature
 

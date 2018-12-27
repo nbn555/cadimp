@@ -5,6 +5,7 @@
 #include "opencv2\highgui\highgui.hpp"
 #include "opencv2\imgproc\imgproc.hpp"
 #include "LiProcess.h"
+#include "shape_detection.h"
 #ifdef WINDOWS
 #include <direct.h>
 #define GetCurrentDir _getcwd
@@ -28,6 +29,17 @@ int main(int argc, char** argv) {
 	removeBorder(src, removedBorderMat);
 	imshow("removed", removedBorderMat);
 	waitKey();
+	vector<Point> intersectionPoints;
+	getIntersections(removedBorderMat, intersectionPoints);
+	/*
+		for (size_t i = 0; i < intersectionPoints.size(); i++)
+		{
+			circle(removedBorderMat, intersectionPoints[i], 4, Scalar(0, 0, 255), 2);
+		}
+		imshow("removedBorderMat", removedBorderMat);
+		waitKey();*/
+		vector<Vec3f> outCircles;
+	detectCircle2(removedBorderMat,outCircles, intersectionPoints, "");
  //   char result[MAX_PATH];
  //   GetCurrentDir(result, sizeof(result));
  // //  std::string trainpath = std::string(result);
