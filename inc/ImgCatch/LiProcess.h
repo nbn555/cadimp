@@ -3,7 +3,7 @@
 
 #include"preprocessing.h"
 #include "opencv2\core\core.hpp"
-
+#include <vector>
 using namespace cv;
 
 //#define  SHOW_IMAGE_TO_DEBUG

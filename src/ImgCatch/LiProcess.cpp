@@ -4,6 +4,7 @@
 #include "opencv2\imgproc\imgproc.hpp"
 //#include "dirent.h"
 #include "shape_detection.h"
+using namespace cv;
 
 void removeBorder(Mat& src, Mat &removedBorderMat) {
 	Mat gray;
@@ -55,6 +56,8 @@ void removeBorder(Mat& src, Mat &removedBorderMat) {
 //	//Mat original_mat;
 //	string full_path;
 //
+//
+//
 //	if (pDIR = opendir(path.c_str())) {
 //		while (entry = readdir(pDIR)) {
 //			if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
@@ -72,38 +75,13 @@ void removeBorder(Mat& src, Mat &removedBorderMat) {
 //					continue;
 //				}
 //				vector<Vec3f> outCircles;
-//				detectCircle(src, outCircles, newPath);
+//				//detectCircle(src, outCircles, newPath);
 //			}
 //		}
 //		closedir(pDIR);
 //		delete entry;
 //	}
 //}
-
-	if (pDIR = opendir(path.c_str())) {
-		while (entry = readdir(pDIR)) {
-			if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
-				string newPath = path + "\\" + entry->d_name;
-				if (entry->d_type == DT_DIR) {
-					testFolder(newPath);
-					continue;
-				}
-				Mat src, src_gray;
-
-				/// Read the image
-				src = imread(newPath);
-				if (!src.data)
-				{
-					continue;
-				}
-				vector<Vec3f> outCircles;
-				//detectCircle(src, outCircles, newPath);
-			}
-		}
-		closedir(pDIR);
-		delete entry;
-	}
-}
 
 void detectCircle1(Mat &src, vector<Point> intersectionPoints, vector<Vec3f> &outCircles) {
 	if (!src.data)
