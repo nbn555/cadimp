@@ -187,16 +187,20 @@ double getDistance(const Point2f &point1, const Point2f &point2)
 {
 	return sqrt(pow(point1.x - point2.x, 2) + pow(point1.y - point2.y, 2));
 }
-
+double getDistance2(const Point2f &point1, const Point2f &point2)
+{
+    return ((point1.x - point2.x)*(point1.x - point2.x) +(point1.y - point2.y)*(point1.y - point2.y));
+}
 // Calculate middle point
 cv::Point2f getMidPoint(const cv::Point2f &p1, const cv::Point2f &p2)
 {
 	cv::Point2f mid_point;
-	mid_point.x = (p1.x + p2.x) / 2;
-	mid_point.y = (p1.y + p2.y) / 2;
+	mid_point.x = (p1.x + p2.x)*0.5;
+	mid_point.y = (p1.y + p2.y)*0.5;
 	return mid_point;
 }
 
+#if 0
 void detectLines(Mat src, vector<Vec4i> &lines)
 {
 	cv::Mat gray_image(src.size(), CV_8UC1, cv::Scalar(0));
@@ -391,7 +395,100 @@ void detectLines(Mat src, vector<Vec4i> &lines)
 	//		}
 	//	}
 }
+#else
 
+void detectLines(Mat src, vector<Vec4i> &lines)
+{
+    cv::Mat gray_image(src.size(), CV_8UC1, cv::Scalar(0));
+    cv::Mat edges_image(src.size(), CV_8UC1, cv::Scalar(0));
+    cv::Mat connected_image(src.size(), CV_8UC1, cv::Scalar(0));
+    int nRows = src.rows;
+    //int nNumberOfIteration = 3;
+
+    cv::cvtColor(src, gray_image, CV_BGR2GRAY);
+    gray_image = cv::Scalar::all(255) - gray_image;
+    cv::threshold(gray_image, gray_image, 0, 255, CV_THRESH_BINARY + CV_THRESH_OTSU);
+    //cv::GaussianBlur(gray_image, gray_image, cv::Size(3, 3), 0);
+
+    auto nLabels = cv::connectedComponents(gray_image, connected_image);
+
+    cv::Mat dst_image(src.size(), CV_8UC1, cv::Scalar(0));
+    cv::Mat temp_image(dst_image.size(), dst_image.type(), cv::Scalar(0));
+    std::vector<std::vector<Point>> vtContours;
+    std::vector<Vec4i> vtHierarchy;
+    cv::Point2f rect_points[4];
+    std::vector<std::vector<Point>> vtCnt(1);
+    vtCnt[0].resize(5);
+    std::vector<cv::Point>* vtRectCnt = &vtCnt[0];
+    double distance2;
+    for (auto i = 1; i < nLabels; i++)
+    {
+        
+        cv::inRange(connected_image, cv::Scalar(i), cv::Scalar(i), dst_image);
+        //Step 1: Get all separate lines
+
+        bool check = false;
+        vtContours.clear();
+        vtHierarchy.clear();
+        cv::findContours(dst_image, vtContours, vtHierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
+        for (auto &&cnt : vtContours)
+        {
+            if (cv::arcLength(cnt, false) >= 5)
+            {
+                auto rect = cv::minAreaRect(cv::Mat(cnt));
+                auto index = 0;
+                
+                rect.points(rect_points);
+
+                if (getDistance2(rect_points[0], rect_points[1]) >= getDistance2(rect_points[1], rect_points[2]))
+                {
+                    index = 1;
+                }
+                auto dDistance = getDistance2(rect_points[index], rect_points[index + 1]);
+                if (dDistance < 49.0 && dDistance >= 1.0)
+                {
+                    /*if (getDistance(rect_points[index], rect_points[index + 1]) < 10.0)
+                    {*/
+                        
+                        for(int i1 = 0; i1 < 4; ++i1)
+                        {
+                            vtRectCnt->at(i1) = cv::Point((int)rect_points[i1].x, (int)rect_points[i1].y);
+                        }
+                        vtRectCnt->at(4) = (cv::Point((int)rect_points[0].x, (int)rect_points[0].y));
+
+                        cv::drawContours(temp_image, vtCnt, 0, cv::Scalar(255), -1);
+                        check = true;
+                        auto p1 = getMidPoint(rect_points[index], rect_points[index + 1]);
+                        auto p2 = getMidPoint(rect_points[index + 2], rect_points[(index + 3) % 4]);
+
+                        lines.push_back(Vec4i(p1.x, p1.y, p2.x, p2.y));
+                  //  }
+                }
+            }
+        }
+
+        if (check)
+        {
+            cv::bitwise_and(dst_image, temp_image, temp_image);
+            dst_image = dst_image - temp_image;
+        }
+
+        // Step 2:
+        std::vector<cv::Vec4i> vtlines;
+        //cv::Mat gray_temp_image(gray_image.size(), gray_image.type(), Scalar(0));
+
+        //		cv::ximgproc::thinning(gray_image, temp_image);
+        //thinning(gray_image, temp_image);
+        cv::HoughLinesP(dst_image, vtlines, 1, CV_PI / 180, 5, 5, 5);
+        if (vtlines.size() > 0)
+        {
+            lines.insert(lines.end(), vtlines.begin(), vtlines.end());
+        }
+    }
+
+}
+
+#endif
 #else
 
 void getLines(Mat src, std::vector<sline> &lines)

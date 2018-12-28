@@ -2,7 +2,7 @@
 
 #include "opencv2\highgui\highgui.hpp"
 #include "opencv2\imgproc\imgproc.hpp"
-#include "dirent.h"
+//#include "dirent.h"
 #include "shape_detection.h"
 
 void removeBorder(Mat& src, Mat &removedBorderMat) {
@@ -49,11 +49,36 @@ void removeBorder(Mat& src, Mat &removedBorderMat) {
 		//imwrite("removedMat.jpg", contourMat);
 	}
 }
-void testFolder(const string &path) {
-	DIR *pDIR;
-	struct dirent *entry;
-	//Mat original_mat;
-	string full_path;
+//void testFolder(const string &path) {
+//	DIR *pDIR;
+//	struct dirent *entry;
+//	//Mat original_mat;
+//	string full_path;
+//
+//	if (pDIR = opendir(path.c_str())) {
+//		while (entry = readdir(pDIR)) {
+//			if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
+//				string newPath = path + "\\" + entry->d_name;
+//				if (entry->d_type == DT_DIR) {
+//					testFolder(newPath);
+//					continue;
+//				}
+//				Mat src, src_gray;
+//
+//				/// Read the image
+//				src = imread(newPath);
+//				if (!src.data)
+//				{
+//					continue;
+//				}
+//				vector<Vec3f> outCircles;
+//				detectCircle(src, outCircles, newPath);
+//			}
+//		}
+//		closedir(pDIR);
+//		delete entry;
+//	}
+//}
 
 	if (pDIR = opendir(path.c_str())) {
 		while (entry = readdir(pDIR)) {
