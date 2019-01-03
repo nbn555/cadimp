@@ -33,6 +33,9 @@
 #include "TextDetectorAPI.h"
 #include "opencv2\highgui\highgui.hpp"
 #include "opencv2\imgproc\imgproc.hpp"
+#include <string>
+#include <locale>
+#include <codecvt>
 
 using namespace std;
 using namespace cv;
@@ -242,6 +245,78 @@ void findTextOfLine(Mat &src, vector<vector<RotatedRect>> &groupedRects, tessera
 	imwrite("outTextMat.jpg", outTextMat);
 
 }
+
+std::wstring utf8_to_utf16(const std::string& utf8)
+{
+	std::vector<unsigned long> unicode;
+	size_t i = 0;
+	while (i < utf8.size())
+	{
+		unsigned long uni;
+		size_t todo;
+		bool error = false;
+		unsigned char ch = utf8[i++];
+		if (ch <= 0x7F)
+		{
+			uni = ch;
+			todo = 0;
+		}
+		else if (ch <= 0xBF)
+		{
+			throw std::logic_error("not a UTF-8 string");
+		}
+		else if (ch <= 0xDF)
+		{
+			uni = ch & 0x1F;
+			todo = 1;
+		}
+		else if (ch <= 0xEF)
+		{
+			uni = ch & 0x0F;
+			todo = 2;
+		}
+		else if (ch <= 0xF7)
+		{
+			uni = ch & 0x07;
+			todo = 3;
+		}
+		else
+		{
+			throw std::logic_error("not a UTF-8 string");
+		}
+		for (size_t j = 0; j < todo; ++j)
+		{
+			if (i == utf8.size())
+				throw std::logic_error("not a UTF-8 string");
+			unsigned char ch = utf8[i++];
+			if (ch < 0x80 || ch > 0xBF)
+				throw std::logic_error("not a UTF-8 string");
+			uni <<= 6;
+			uni += ch & 0x3F;
+		}
+		if (uni >= 0xD800 && uni <= 0xDFFF)
+			throw std::logic_error("not a UTF-8 string");
+		if (uni > 0x10FFFF)
+			throw std::logic_error("not a UTF-8 string");
+		unicode.push_back(uni);
+	}
+	std::wstring utf16;
+	for (size_t i = 0; i < unicode.size(); ++i)
+	{
+		unsigned long uni = unicode[i];
+		if (uni <= 0xFFFF)
+		{
+			utf16 += (wchar_t)uni;
+		}
+		else
+		{
+			uni -= 0x10000;
+			utf16 += (wchar_t)((uni >> 10) + 0xD800);
+			utf16 += (wchar_t)((uni & 0x3FF) + 0xDC00);
+		}
+	}
+	return utf16;
+}
 /**********************************************************************
  *  main()
  *
@@ -251,12 +326,18 @@ bool detectText(Mat &src, vector<pair<string, RotatedRect>> &outText) {
 	// Create Tesseract object
 	tesseract::TessBaseAPI *ocr = new tesseract::TessBaseAPI();
 	// Initialize tesseract to use English (eng) and the LSTM OCR engine. 
-	ocr->Init(g_traning_data_path.c_str(), "eng"/*"deu"*/, tesseract::OEM_DEFAULT);
+	ocr->Init(g_traning_data_path.c_str(), "grc", tesseract::OEM_DEFAULT);
 	// Set Page segmentation mode to PSM_AUTO (3)
 	ocr->SetPageSegMode(tesseract::PSM_SINGLE_LINE);
-	ocr->SetVariable("tessedit_char_whitelist", "φ0123456789abcdefjhijklmnopqrstuvwxyzABCDEFJHIJKLMNOPQRSTUVWXYZ.,+-");
+	//ocr->SetVariable("tessedit_char_whitelist", "φ0123456789abcdefjhijklmnopqrstuvwxyzABCDEFJHIJKLMNOPQRSTUVWXYZ.,+-");
+	string outTextStr;
+	ocr->SetImage(src.data, src.cols, src.rows, 3, src.step);
 
-
+	// Run Tesseract OCR on image
+	outTextStr = string(ocr->GetUTF8Text());
+	std::wstring sLogLevel = utf8_to_utf16(outTextStr);
+	/*std::wstring_convert<std::codecvt_utf8_utf16<char16_t>> converter;
+	std::wstring wstr = wstring(converter.from_bytes(outTextStr));*/
 	double scale = 640.0 / src.size().width;
 	//resize(src, src, cv::Size(), scale, scale);
 	/*namedWindow("Original image", CV_WINDOW_AUTOSIZE);
