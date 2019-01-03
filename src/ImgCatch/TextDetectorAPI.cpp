@@ -126,25 +126,28 @@ void findCharacterRects(Mat& src, vector<RotatedRect> &filteredRects) {
 	//Find contours
 	vector<vector<Point2i>> contours;
 	vector<Vec4i> hierarchy;
-	findContours(binaryMat, contours, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_NONE);
+	findContours(binaryMat.clone(), contours, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_NONE);
 
 	Mat contourMat(binaryMat.size(), CV_8UC1, Scalar::all(0));
 	drawContours(contourMat, contours, -1, Scalar::all(255));
 	imshow("contourMat", contourMat);
 	waitKey(0);
 	vector<Vec4i> lines;
-	HoughLinesP(contourMat, lines, 1, CV_PI / 180, 200, 50, 10);
+	HoughLinesP(contourMat, lines, 1, CV_PI / 180, 200, 100, 10);
 	Mat lineMat;
 	cvtColor(contourMat, lineMat, CV_GRAY2BGR);
 	for (size_t i = 0; i < lines.size(); i++)
 	{
 		Vec4i l = lines[i];
 		line(lineMat, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(0, 0, 255));
+		line(binaryMat, Point(l[0], l[1]), Point(l[2], l[3]), Scalar::all(0), 9);
 	}
+
 	//imshow("source", src);
-	imshow("detected lines", lineMat);
-	imwrite("detectedlines.jpg", lineMat);
-	waitKey();
+	//imshow("detected lines", lineMat);
+	imwrite("detectedlines.jpg", binaryMat);
+	//waitKey();
+	findContours(binaryMat.clone(), contours, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_NONE);
 	//Filter contours
 	for (size_t i = 0; i < contours.size(); i++)
 	{
@@ -346,7 +349,7 @@ bool detectText(Mat &src, vector<pair<string, RotatedRect>> &outText) {
 	// Create Tesseract object
 	tesseract::TessBaseAPI *ocr = new tesseract::TessBaseAPI();
 	// Initialize tesseract to use English (eng) and the LSTM OCR engine. 
-	ocr->Init(g_traning_data_path.c_str(), "grc", tesseract::OEM_DEFAULT);
+	ocr->Init(g_traning_data_path.c_str(), "grc+eng", tesseract::OEM_DEFAULT);
 	// Set Page segmentation mode to PSM_AUTO (3)
 	ocr->SetPageSegMode(tesseract::PSM_SINGLE_LINE);
 	//ocr->SetVariable("tessedit_char_whitelist", "φ0123456789abcdefjhijklmnopqrstuvwxyzABCDEFJHIJKLMNOPQRSTUVWXYZ.,+-");

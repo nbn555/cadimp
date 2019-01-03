@@ -20,14 +20,14 @@ int main(int argc, char** argv) {
 	Mat src, src_gray;
 
 	/// Read the image
-	src = imread("Test3\\0032_e.jpg", 1);
+	src = imread("Test3\\20181219031311074_0014.jpg", 1);
 
 	if (!src.data)
 	{
 		return -1;
 	}
-	//Mat removedBorderMat;
-	//removeBorder(src, removedBorderMat);
+	Mat removedBorderMat;
+	removeBorder(src, removedBorderMat);
 	//imshow("removed", removedBorderMat);
 	//waitKey();
 	//vector<Point> intersectionPoints;
@@ -43,9 +43,9 @@ int main(int argc, char** argv) {
     char result[MAX_PATH];
     GetCurrentDir(result, sizeof(result));
   //  std::string trainpath = std::string(result);
-    setTrainingDataPath(std::string(result));
+    //setTrainingDataPath(std::string(result));
     setMinHeightText(5);
 	vector<pair<string, RotatedRect>> outText;
-	detectText(src, outText);
+	detectText(removedBorderMat, outText);
 	return EXIT_SUCCESS;
 }
