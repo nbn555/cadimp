@@ -118,10 +118,30 @@ void findCharacterRects(Mat& src, vector<RotatedRect> &filteredRects) {
 	//Convert to binary Mat
 	Mat binaryMat;
 	threshold(gray, binaryMat, 0, 255, cv::THRESH_BINARY_INV + cv::THRESH_OTSU);
+
+	
 	//Find contours
 	vector<vector<Point2i>> contours;
 	vector<Vec4i> hierarchy;
 	findContours(binaryMat, contours, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_NONE);
+
+	Mat contourMat(binaryMat.size(), CV_8UC1, Scalar::all(0));
+	drawContours(contourMat, contours, -1, Scalar::all(255));
+	imshow("contourMat", contourMat);
+	waitKey(0);
+	vector<Vec4i> lines;
+	HoughLinesP(contourMat, lines, 1, CV_PI / 180, 200, 50, 10);
+	Mat lineMat;
+	cvtColor(contourMat, lineMat, CV_GRAY2BGR);
+	for (size_t i = 0; i < lines.size(); i++)
+	{
+		Vec4i l = lines[i];
+		line(lineMat, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(0, 0, 255));
+	}
+	//imshow("source", src);
+	imshow("detected lines", lineMat);
+	imwrite("detectedlines.jpg", lineMat);
+	waitKey();
 	//Filter contours
 	for (size_t i = 0; i < contours.size(); i++)
 	{
