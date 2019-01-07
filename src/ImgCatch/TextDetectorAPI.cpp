@@ -36,6 +36,12 @@
 #include <string>
 #include <locale>
 #include <codecvt>
+#include "dirent.h"
+#include "shape_detection.h"
+#include "LiProcess.h"
+#include <algorithm>
+
+#define SHOW_DEBUG_
 
 using namespace std;
 using namespace cv;
@@ -52,7 +58,39 @@ void setMinHeightText(int h)
     g_min_height_text = h;
 }
 
-bool cropByContour(Mat &src, vector<Point2i> &contour, Mat &cropped, RotatedRect &rect) {
+void testFolder(const string &path) {
+	DIR *pDIR;
+	struct dirent *entry;
+	//Mat original_mat;
+	string full_path;
+	if (pDIR = opendir(path.c_str())) {
+		while (entry = readdir(pDIR)) {
+			if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
+				string newPath = path + "\\" + entry->d_name;
+				if (entry->d_type == DT_DIR) {
+					testFolder(newPath);
+					continue;
+				}
+				Mat src, src_gray;
+
+				/// Read the image
+				src = imread(newPath);
+				if (!src.data)
+				{
+					continue;
+				}
+				Mat removedBorderMat;
+				removeBorder(src, removedBorderMat);
+				vector<pair<string, RotatedRect>> outText;
+				detectText(removedBorderMat, outText, newPath);
+			}
+		}
+		closedir(pDIR);
+		delete entry;
+	}
+}
+
+bool cropByContour(Mat &src, vector<Point2i> &contour, Mat &cropped, RotatedRect &rect, float angle) {
 	// rect is the RotatedRect (I got it from a contour...)
 	rect = minAreaRect(contour);
 	// matrices we'll use
@@ -68,6 +106,10 @@ bool cropByContour(Mat &src, vector<Point2i> &contour, Mat &cropped, RotatedRect
 			rect.angle += 90.0;
 		}
 		swap(rect.size.width, rect.size.height);
+	}
+	if (abs(rect.angle - angle) > 45)
+	{
+		rect.angle = angle;
 	}
 	Size2f rect_size = rect.size;
 	//cout << angle << endl;
@@ -89,10 +131,8 @@ bool cropByContour(Mat &src, vector<Point2i> &contour, Mat &cropped, RotatedRect
 	return true;
 }
 
-void drawRotatedRectangle(cv::Mat& image, RotatedRect &rotatedRectangle)
+void drawRotatedRectangle(cv::Mat& image, RotatedRect &rotatedRectangle, Scalar color = Scalar(0,0,255))
 {
-	cv::Scalar color = cv::Scalar(0, 0, 255); // white
-
 											  // We take the edges that OpenCV calculated for us
 	cv::Point2f vertices2f[4];
 	rotatedRectangle.points(vertices2f);
@@ -110,7 +150,7 @@ void drawRotatedRectangle(cv::Mat& image, RotatedRect &rotatedRectangle)
 		color);
 }
 
-void findCharacterRects(Mat& src, vector<RotatedRect> &filteredRects) {
+void findCharacterRects(Mat& src, vector<RotatedRect> &filteredRects, std::string path = "") {
 	filteredRects.clear();
 	Mat gray, edge, draw;
 	//Convert to gray Mat
@@ -130,8 +170,8 @@ void findCharacterRects(Mat& src, vector<RotatedRect> &filteredRects) {
 
 	Mat contourMat(binaryMat.size(), CV_8UC1, Scalar::all(0));
 	drawContours(contourMat, contours, -1, Scalar::all(255));
-	imshow("contourMat", contourMat);
-	waitKey(0);
+	/*imshow("contourMat", contourMat);
+	waitKey(0);*/
 	vector<Vec4i> lines;
 	HoughLinesP(contourMat, lines, 1, CV_PI / 180, 200, 100, 10);
 	Mat lineMat;
@@ -145,7 +185,8 @@ void findCharacterRects(Mat& src, vector<RotatedRect> &filteredRects) {
 
 	//imshow("source", src);
 	//imshow("detected lines", lineMat);
-	imwrite("detectedlines.jpg", binaryMat);
+	std::string newPath = path + "Detectedlines.jpg";
+	imwrite(newPath, binaryMat);
 	//waitKey();
 	findContours(binaryMat.clone(), contours, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_NONE);
 	//Filter contours
@@ -184,49 +225,125 @@ void findCharacterRects(Mat& src, vector<RotatedRect> &filteredRects) {
 	}
 }
 
-void groupCharacterRects(vector<RotatedRect> &filteredRects, vector<vector<RotatedRect>> &groupedRects) {
+void findNearRects(std::vector<RotatedRect> &rects, std::vector<RotatedRect> &oldNearRects, std::vector<RotatedRect> &newNearRects, Mat &src) {
+	newNearRects.clear();
+	RotatedRect *aRect, *rect;
+	for (size_t oldId = 0; oldId < oldNearRects.size(); oldId++)
+	{
+		rect = &oldNearRects[oldId];
+		for (size_t rectId = 0; rectId < rects.size(); rectId++)
+		{
+			aRect = &rects[rectId];
+#ifdef SHOW_DEBUG
+			Mat rectMat1 = src.clone();
+			drawRotatedRectangle(rectMat1, *aRect, Scalar(0, 255, 255));
+			namedWindow("rectangle", CV_WINDOW_NORMAL);
+			setWindowProperty("rectangle", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
+			imshow("rectangle", rectMat1);
+			waitKey(0);
+#endif // SHOW_DEBUG
+						//Don't group rectangles having angles are difference too much
+			if (abs(rect->angle - aRect->angle) > 45)
+			{
+				continue;
+			}
+			//Group the rectangles are quite near together
+			double distance = norm(rect->center - aRect->center);
+			if (distance < 50 || distance < min(rect->size.height,aRect->size.height) * 2)
+			{
+#ifdef SHOW_DEBUG
+				drawRotatedRectangle(src, *aRect);
+#endif // SHOW_DEBUG
+				newNearRects.push_back(*aRect);
+				rects.erase(rects.begin() + rectId);
+				rectId--;
+			}
+		}
+	}
+}
+
+void findARectGroup(std::vector<RotatedRect> &rects, std::vector<RotatedRect> &groupedRects, Mat &src) {
+	groupedRects.clear();
+	RotatedRect rect = rects.back();
+#ifdef SHOW_DEBUG
+		Mat rectMat = src.clone();
+		drawRotatedRectangle(rectMat, rect);
+#endif // SHOW_DEBUG
+	rects.pop_back();
+	std::vector<RotatedRect> oldRectGroup, newRectGroup;
+	oldRectGroup.push_back(rect);
+	groupedRects.push_back(rect);
+	do
+	{
+		findNearRects(rects, oldRectGroup, newRectGroup, src);
+		oldRectGroup.clear();
+		oldRectGroup.assign(newRectGroup.begin(), newRectGroup.end());
+		for (size_t i = 0; i < newRectGroup.size(); i++)
+		{
+			groupedRects.push_back(newRectGroup[i]);
+		}
+	} while (!newRectGroup.empty() && !rects.empty());
+}
+
+void groupCharacterRects(vector<RotatedRect> &filteredRects, vector<vector<RotatedRect>> &groupedRects, Mat& src) {
 	while (!filteredRects.empty())
 	{
 		vector<RotatedRect> aRectGroup;
-		aRectGroup.push_back(filteredRects.back());
-		filteredRects.pop_back();
-		RotatedRect *groupedRect, *filteredRect;
+		findARectGroup(filteredRects, aRectGroup, src);
+//
 
-		for (size_t i = 0; i < filteredRects.size(); i++)
-		{
-			filteredRect = &filteredRects[i];
-			for (size_t j = 0; j < aRectGroup.size(); j++)
-			{
-				groupedRect = &aRectGroup[j];
-				//Don't group rectangles having angles are difference too much
-				if (abs(groupedRect->angle - filteredRect->angle) > 45)
-				{
-					continue;
-				}
-				//Group the rectangles are quite near together
-				if (norm(groupedRect->center - filteredRect->center) < (groupedRect->size.width + filteredRect->size.width) * 2)
-				{
-					aRectGroup.push_back(*filteredRect);
-					filteredRects.erase(filteredRects.begin() + i);
+//		filteredRects.pop_back();
+//		RotatedRect *groupedRect, *filteredRect;
+//		
+//		for (size_t i = 0; i < filteredRects.size(); i++)
+//		{
+//			filteredRect = &filteredRects[i];
+
+//			for (size_t j = 0; j < aRectGroup.size(); j++)
+//			{
+//				groupedRect = &aRectGroup[j];
+//				//Don't group rectangles having angles are difference too much
+//				if (abs(groupedRect->angle - filteredRect->angle) > 45)
+//				{
+//					continue;
+//				}
+//				//Group the rectangles are quite near together
+//				if (norm(groupedRect->center - filteredRect->center) < (groupedRect->size.width + filteredRect->size.width) * 2)
+//				{
+//					aRectGroup.push_back(*filteredRect);
+
+					/*filteredRects.erase(filteredRects.begin() + i);
 					i--;
 					break;
 				}
 			}
-		}
+		}*/
 		groupedRects.push_back(aRectGroup);
 	}
 }
 
-void findTextOfLine(Mat &src, vector<vector<RotatedRect>> &groupedRects, tesseract::TessBaseAPI *ocr, vector<pair<string, RotatedRect>> &outText){
+void findTextOfLine(Mat &src, vector<vector<RotatedRect>> &groupedRects, tesseract::TessBaseAPI *ocr, vector<pair<string, RotatedRect>> &outText, std::string path = ""){
 	Mat outTextMat = src.clone();
 	for (size_t i = 0; i < groupedRects.size(); i++)
 	{
-		//Mat groupedRectMat = src.clone();
+		Mat groupedRectMat = src.clone();
 		vector<RotatedRect> aRectGroup = groupedRects[i];
 		vector<Point> wordContour;
+		float angleTotal = 0;
+		float angle;
 		for (size_t j = 0; j < aRectGroup.size(); j++)
 		{
-			//drawRotatedRectangle(groupedRectMat, aRectGroup[j]);
+			angle = aRectGroup[j].angle;
+			if (aRectGroup[j].size.width > aRectGroup[j].size.height) {
+				if (aRectGroup[j].angle == 0) {
+					angle = -90;
+				}
+				else {
+					angle += 90.0;
+				}
+			}
+			angleTotal += angle;
+			drawRotatedRectangle(groupedRectMat, aRectGroup[j]);
 			cv::Point2f vertices2f[4];
 			aRectGroup[j].points(vertices2f);
 
@@ -236,16 +353,20 @@ void findTextOfLine(Mat &src, vector<vector<RotatedRect>> &groupedRects, tessera
 			}
 		}
 
-
-		//imshow("groupedRectMat", groupedRectMat);
+		angle = angleTotal / aRectGroup.size();
+		namedWindow("rectangle", CV_WINDOW_NORMAL);
+		setWindowProperty("rectangle", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
+		imshow("rectangle", groupedRectMat);
+		//waitKey(0);
 		Mat cropped;
 		RotatedRect rect;
-		bool flag = cropByContour(src, wordContour, cropped, rect);
+		bool flag = cropByContour(src, wordContour, cropped, rect, angle);
 		if (!flag)
 		{
 			continue;
 		}
-		//imshow("cropped", cropped);
+		/*imshow("cropped", cropped);
+		waitKey(0);*/
 		string outTextStr;
 
 		// Set image data
@@ -260,12 +381,14 @@ void findTextOfLine(Mat &src, vector<vector<RotatedRect>> &groupedRects, tessera
 		// print recognized text
 		cout << outTextStr << endl;
 
+		outTextStr.erase(std::remove(outTextStr.begin(), outTextStr.end(), '\n'), outTextStr.end());
 		putText(outTextMat, outTextStr, wordContour[0], FONT_HERSHEY_SIMPLEX, 1, Scalar(0, 0, 255));
 		outText.push_back(pair<string, RotatedRect>(outTextStr, rect));
 
 		//waitKey(0);
 	}
-	imwrite("outTextMat.jpg", outTextMat);
+	string newPath = path + "TextMat.jpg";
+	imwrite(newPath, outTextMat);
 
 }
 
@@ -345,20 +468,20 @@ std::wstring utf8_to_utf16(const std::string& utf8)
  *
  **********************************************************************/
 //
-bool detectText(Mat &src, vector<pair<string, RotatedRect>> &outText) {
+bool detectText(Mat &src, vector<pair<string, RotatedRect>> &outText, std::string path) {
 	// Create Tesseract object
 	tesseract::TessBaseAPI *ocr = new tesseract::TessBaseAPI();
 	// Initialize tesseract to use English (eng) and the LSTM OCR engine. 
-	ocr->Init(g_traning_data_path.c_str(), "grc+eng", tesseract::OEM_DEFAULT);
+	ocr->Init(g_traning_data_path.c_str(), "eng", tesseract::OEM_DEFAULT);
 	// Set Page segmentation mode to PSM_AUTO (3)
 	ocr->SetPageSegMode(tesseract::PSM_SINGLE_LINE);
 	//ocr->SetVariable("tessedit_char_whitelist", "φ0123456789abcdefjhijklmnopqrstuvwxyzABCDEFJHIJKLMNOPQRSTUVWXYZ.,+-");
-	string outTextStr;
-	ocr->SetImage(src.data, src.cols, src.rows, 3, src.step);
+	//string outTextStr;
+	//ocr->SetImage(src.data, src.cols, src.rows, 3, src.step);
 
 	// Run Tesseract OCR on image
-	outTextStr = string(ocr->GetUTF8Text());
-	std::wstring sLogLevel = utf8_to_utf16(outTextStr);
+	//outTextStr = string(ocr->GetUTF8Text());
+	//std::wstring sLogLevel = utf8_to_utf16(outTextStr);
 	/*std::wstring_convert<std::codecvt_utf8_utf16<char16_t>> converter;
 	std::wstring wstr = wstring(converter.from_bytes(outTextStr));*/
 	double scale = 640.0 / src.size().width;
@@ -366,12 +489,12 @@ bool detectText(Mat &src, vector<pair<string, RotatedRect>> &outText) {
 	/*namedWindow("Original image", CV_WINDOW_AUTOSIZE);
 	imshow("Original image", src);*/
 	vector<RotatedRect> filteredRects;
-	findCharacterRects(src, filteredRects);
+	findCharacterRects(src, filteredRects, path);
 	//group contours
 	vector<vector<RotatedRect>> groupedRects;
-	groupCharacterRects(filteredRects, groupedRects);
+	groupCharacterRects(filteredRects, groupedRects, src);
 
-	findTextOfLine(src, groupedRects, ocr, outText);
+	findTextOfLine(src, groupedRects, ocr, outText, path);
 	delete(ocr);
 	return true;
 }

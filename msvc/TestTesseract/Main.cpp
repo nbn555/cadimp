@@ -18,34 +18,24 @@ using namespace std;
 
 int main(int argc, char** argv) {
 	Mat src, src_gray;
-
+	testFolder("Test3.1");
 	/// Read the image
-	src = imread("Test3\\20181219031311074_0014.jpg", 1);
+	//src = imread("Test3\\20181219031311074_0001.jpg", 1);
 
-	if (!src.data)
-	{
-		return -1;
-	}
-	Mat removedBorderMat;
-	removeBorder(src, removedBorderMat);
-	//imshow("removed", removedBorderMat);
-	//waitKey();
-	//vector<Point> intersectionPoints;
-	///*
-	//	for (size_t i = 0; i < intersectionPoints.size(); i++)
-	//	{
-	//		circle(removedBorderMat, intersectionPoints[i], 4, Scalar(0, 0, 255), 2);
-	//	}
-	//	imshow("removedBorderMat", removedBorderMat);
-	//	waitKey();*/
-	//	vector<Vec3f> outCircles;
-	//detectCircle(removedBorderMat,outCircles, intersectionPoints, "");
-    char result[MAX_PATH];
-    GetCurrentDir(result, sizeof(result));
-  //  std::string trainpath = std::string(result);
-    //setTrainingDataPath(std::string(result));
-    setMinHeightText(5);
-	vector<pair<string, RotatedRect>> outText;
-	detectText(removedBorderMat, outText);
+	//if (!src.data)
+	//{
+	//	return -1;
+	//}
+	//Mat removedBorderMat;
+	//removeBorder(src, removedBorderMat);
+	////	vector<Vec3f> outCircles;
+	////detectCircle(removedBorderMat,outCircles, intersectionPoints, "");
+ //   char result[MAX_PATH];
+ //   GetCurrentDir(result, sizeof(result));
+ // //  std::string trainpath = std::string(result);
+ //   //settrainingdatapath(std::string(result));
+ //   setMinHeightText(5);
+	//vector<pair<string, RotatedRect>> outtext;
+	//detectText(removedBorderMat, outtext);
 	return EXIT_SUCCESS;
 }
