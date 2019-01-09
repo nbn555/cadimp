@@ -488,7 +488,7 @@ void detectLines(Mat src, vector<Vec4i> &lines)
 
 }
 
-void detectArrows(Mat src, vector<vector<Point2f>> &vtArrows, const double &standard_area = 400.0, const double &standard_ratio = 0.5)
+void detectArrows(const Mat &src, vector<vector<Point2f>> &vtArrows, const double &standard_area, const double &standard_ratio)
 {
 	printf("%f\n", standard_area);
 	Mat gray_image(src.size(), CV_8UC1, Scalar(0));

@@ -150,7 +150,7 @@ void drawRotatedRectangle(cv::Mat& image, RotatedRect &rotatedRectangle, Scalar 
 		color);
 }
 
-void findCharacterRects(Mat& src, vector<RotatedRect> &filteredRects, std::string path = "") {
+void findCharacterRects(Mat& src, vector<RotatedRect> &filteredRects, std::string path /*= ""*/) {
 	filteredRects.clear();
 	Mat gray, edge, draw;
 	//Convert to gray Mat
@@ -327,6 +327,76 @@ void groupCharacterRects(vector<RotatedRect> &filteredRects, vector<vector<Rotat
 		}*/
 		groupedRects.push_back(aRectGroup);
 	}
+}
+
+void findTextOfLine(Mat &src, vector<vector<RotatedRect>> &groupedRects, tesseract::TessBaseAPI *ocr, vector<pair<string, RotatedRect>> &outText, std::string path = ""){
+	Mat outTextMat = src.clone();
+	for (size_t i = 0; i < groupedRects.size(); i++)
+	{
+		Mat groupedRectMat = src.clone();
+		vector<RotatedRect> aRectGroup = groupedRects[i];
+		vector<Point> wordContour;
+		float angleTotal = 0;
+		float angle;
+		for (size_t j = 0; j < aRectGroup.size(); j++)
+		{
+			angle = aRectGroup[j].angle;
+			if (aRectGroup[j].size.width > aRectGroup[j].size.height) {
+				if (aRectGroup[j].angle == 0) {
+					angle = -90;
+				}
+				else {
+					angle += 90.0;
+				}
+			}
+			angleTotal += angle;
+			drawRotatedRectangle(groupedRectMat, aRectGroup[j]);
+			cv::Point2f vertices2f[4];
+			aRectGroup[j].points(vertices2f);
+
+			// Convert them so we can use them in a fillConvexPoly
+			for (int i = 0; i < 4; ++i) {
+				wordContour.push_back((Point)vertices2f[i]);
+			}
+		}
+
+		angle = angleTotal / aRectGroup.size();
+		//namedWindow("rectangle", CV_WINDOW_NORMAL);
+		//setWindowProperty("rectangle", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
+		//imshow("rectangle", groupedRectMat);
+		//waitKey(0);
+		Mat cropped;
+		RotatedRect rect;
+		bool flag = cropByContour(src, wordContour, cropped, rect, angle);
+		if (!flag)
+		{
+			continue;
+		}
+		/*imshow("cropped", cropped);
+		waitKey(0);*/
+		string outTextStr;
+
+		// Set image data
+		ocr->SetImage(cropped.data, cropped.cols, cropped.rows, 3, cropped.step);
+
+		// Run Tesseract OCR on image
+		outTextStr = string(ocr->GetUTF8Text());
+		if (outTextStr.empty())
+		{
+			continue;
+		}
+		// print recognized text
+		cout << outTextStr << endl;
+
+		outTextStr.erase(std::remove(outTextStr.begin(), outTextStr.end(), '\n'), outTextStr.end());
+		putText(outTextMat, outTextStr, wordContour[0], FONT_HERSHEY_SIMPLEX, 1, Scalar(0, 0, 255));
+		outText.push_back(pair<string, RotatedRect>(outTextStr, rect));
+
+		//waitKey(0);
+	}
+	string newPath = path + "TextMat.jpg";
+	imwrite(newPath, outTextMat);
+
 }
 
 std::wstring utf8_to_utf16(const std::string& utf8)
