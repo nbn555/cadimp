@@ -94,7 +94,15 @@ void detectCircle1(Mat &src, vector<Point> intersectionPoints, vector<Vec3f> &ou
 	{
 		return;
 	}
-
+#ifdef DEBUG_FLAG
+	Mat intersectionPointMat = src.clone();
+	for (size_t i = 0; i < intersectionPoints.size(); i++)
+	{
+		circle(intersectionPointMat, intersectionPoints[i], 4, Scalar(0, 0, 255), 2);
+	}
+	imshow("intersectionPointMat", intersectionPointMat);
+	waitKey(0);
+#endif
 	int param2 = src.cols > 1000 ? 100 : (src.cols > 200 ? 50 : 30);
 
 	Mat src_gray;
@@ -117,19 +125,19 @@ void detectCircle1(Mat &src, vector<Point> intersectionPoints, vector<Vec3f> &ou
 		}
 		iterator++;
 	} while (!circles.empty() && iterator < 10);
-	//for (size_t i = 0; i < outCircles.size(); i++)
-	//{
-	//	/*outCircles[i][0] = outCircles[i][0] / scale;
-	//	outCircles[i][1] = outCircles[i][1] / scale;
-	//	outCircles[i][2] = outCircles[i][2] / scale;*/
-	//	Point center(cvRound(outCircles[i][0]), cvRound(outCircles[i][1]));
-	//	int radius = cvRound(outCircles[i][2]);
-	//	// circle center
-	//	circle(src, center, 3, Scalar(0, 255, 0), -1, 8, 0);
-	//	// circle outline
-	//	circle(src, center, radius, Scalar(0, 0, 255), 9, 8, 0);
-	//}
-	//imshow("src", src);
+	for (size_t i = 0; i < outCircles.size(); i++)
+	{
+		/*outCircles[i][0] = outCircles[i][0] / scale;
+		outCircles[i][1] = outCircles[i][1] / scale;
+		outCircles[i][2] = outCircles[i][2] / scale;*/
+		Point center(cvRound(outCircles[i][0]), cvRound(outCircles[i][1]));
+		int radius = cvRound(outCircles[i][2]);
+		// circle center
+		circle(src, center, 3, Scalar(0, 255, 0), -1, 8, 0);
+		// circle outline
+		circle(src, center, radius, Scalar(0, 0, 255), 9, 8, 0);
+	}
+	imshow("src", src);
 	//waitKey(0);
 	/*namedWindow("circles", CV_WINDOW_NORMAL);
 	setWindowProperty("circles", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);*/
@@ -152,8 +160,8 @@ void detectCircle2(Mat &src, vector<Vec3f> &outCircles, vector<Point> intersecti
 	{
 		circle(intersectionPointMat, intersectionPoints[i], 4, Scalar(0, 0, 255), 2);
 	}
-	namedWindow("intersectionPointMat", CV_WINDOW_NORMAL);
-	setWindowProperty("intersectionPointMat", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
+	/*namedWindow("intersectionPointMat", CV_WINDOW_NORMAL);
+	setWindowProperty("intersectionPointMat", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);*/
 	imshow("intersectionPointMat", intersectionPointMat);
 	waitKey();
 	//namedWindow("Original image", CV_WINDOW_AUTOSIZE);
@@ -180,8 +188,8 @@ void detectCircle2(Mat &src, vector<Vec3f> &outCircles, vector<Point> intersecti
 		{
 			circle(intersectionPointMat, intersectionPoints[i], 4, Scalar(0, 0, 255), 2);
 		}
-		namedWindow("intersectionPointMat", CV_WINDOW_NORMAL);
-		setWindowProperty("intersectionPointMat", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
+		/*namedWindow("intersectionPointMat", CV_WINDOW_NORMAL);
+		setWindowProperty("intersectionPointMat", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);*/
 		imshow("intersectionPointMat", intersectionPointMat);
 		waitKey();
 
@@ -244,8 +252,8 @@ void detectCircle(Mat &src, vector<Vec3f> &outCircles,vector<Point> intersection
 	{
 		circle(intersectionPointMat, intersectionPoints[i], 4, Scalar(0, 0, 255), 2);
 	}
-	namedWindow("intersectionPointMat", CV_WINDOW_NORMAL);
-	setWindowProperty("intersectionPointMat", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
+	/*namedWindow("intersectionPointMat", CV_WINDOW_NORMAL);
+	setWindowProperty("intersectionPointMat", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);*/
 	imshow("intersectionPointMat", intersectionPointMat);
 	waitKey();
 #endif
