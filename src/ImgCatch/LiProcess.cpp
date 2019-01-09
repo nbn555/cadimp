@@ -4,6 +4,7 @@
 #include "opencv2\imgproc\imgproc.hpp"
 //#include "dirent.h"
 #include "shape_detection.h"
+#define DEBUG_FLAG
 using namespace cv;
 
 void removeBorder(Mat& src, Mat &removedBorderMat) {
@@ -231,7 +232,13 @@ void detectCircle(Mat &src, vector<Vec3f> &outCircles,vector<Point> intersection
 	double scale = 1720.0 / src.size().width;
 	//resizedMat = src.clone();
 	resize(src, resizedMat, cv::Size(), scale, scale, cv::INTER_AREA);
-	getIntersections(resizedMat, intersectionPoints, 1);
+	//getIntersections(resizedMat, intersectionPoints, 1);
+	for (size_t intersectionPointId = 0; intersectionPointId < intersectionPoints.size(); intersectionPointId++)
+	{
+		intersectionPoints[intersectionPointId].x *= scale;
+		intersectionPoints[intersectionPointId].y *= scale;
+	}
+#ifdef DEBUG_FLAG
 	Mat intersectionPointMat = resizedMat.clone();
 	for (size_t i = 0; i < intersectionPoints.size(); i++)
 	{
@@ -241,6 +248,7 @@ void detectCircle(Mat &src, vector<Vec3f> &outCircles,vector<Point> intersection
 	setWindowProperty("intersectionPointMat", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
 	imshow("intersectionPointMat", intersectionPointMat);
 	waitKey();
+#endif
 	//namedWindow("Original image", CV_WINDOW_AUTOSIZE);
 	//imshow("Original image", src);
 	Mat grayMat, cannyMat;
@@ -294,7 +302,6 @@ void detectCircle(Mat &src, vector<Vec3f> &outCircles,vector<Point> intersection
 		waitKey(0);*/
 		croppedMat = blurMat(rect).clone();
 		/// Reduce the noise so we avoid false circle detection
-		string croppedName = std::to_string(contourId) + ".jpg";
 		cvtColor(croppedMat, croppedMat, CV_GRAY2BGR);
 		std:vector<Point> newIntersectionPoints(intersectionPoints.size());
 		for (size_t intersectionPointId = 0; intersectionPointId < intersectionPoints.size(); intersectionPointId++)
@@ -302,7 +309,10 @@ void detectCircle(Mat &src, vector<Vec3f> &outCircles,vector<Point> intersection
 			newIntersectionPoints[intersectionPointId].x = intersectionPoints[intersectionPointId].x - rect.x;
 			newIntersectionPoints[intersectionPointId].y = intersectionPoints[intersectionPointId].y - rect.y;
 		}
+#ifdef DEBUG_FLAG
+		string croppedName = std::to_string(contourId) + ".jpg";
 		imwrite(croppedName, croppedMat);
+#endif // DEBUG_FLAG
 		vector<Vec3f> circles;
 		detectCircle1(croppedMat, newIntersectionPoints, circles);
 		int iterator = 0;
@@ -357,9 +367,10 @@ void detectCircle(Mat &src, vector<Vec3f> &outCircles,vector<Point> intersection
 		imwrite(circleName, croppedMat);*/
 		//waitKey(0);
 	}
+#ifdef DEBUG_FLAG
 	path += "circles.jpg";
 	imwrite(path, src);
-
+#endif // DEBUG_FLAG
 }
 // khoi tao ma tran 2 chieu kich thuoc size
 void CreateIntMatrix(int **&matrix, CvSize size) {

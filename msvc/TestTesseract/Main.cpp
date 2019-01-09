@@ -18,18 +18,20 @@ using namespace std;
 
 int main(int argc, char** argv) {
 	Mat src, src_gray;
-	testFolder("Test3.1");
+	//testFolder("Test3.1");
 	/// Read the image
-	//src = imread("Test3\\20181219031311074_0001.jpg", 1);
+	src = imread("Test3\\20181219031311074_0001.jpg", 1);
 
-	//if (!src.data)
-	//{
-	//	return -1;
-	//}
-	//Mat removedBorderMat;
-	//removeBorder(src, removedBorderMat);
-	////	vector<Vec3f> outCircles;
-	////detectCircle(removedBorderMat,outCircles, intersectionPoints, "");
+	if (!src.data)
+	{
+		return -1;
+	}
+	Mat removedBorderMat;
+	removeBorder(src, removedBorderMat);
+	vector<Point> intersectionPoints;
+	getIntersections(removedBorderMat, intersectionPoints, 1);
+	vector<Vec3f> outCircles;
+	detectCircle(removedBorderMat,outCircles, intersectionPoints, "");
  //   char result[MAX_PATH];
  //   GetCurrentDir(result, sizeof(result));
  // //  std::string trainpath = std::string(result);
