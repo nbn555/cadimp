@@ -126,7 +126,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>../../inc/ImgCatch;../../vendor/opencv/inc;..\..\textCatch\tesseract\vs2010\port;..\..\textCatch\tesseract\api;..\..\textCatch\tesseract\ccmain;..\..\textCatch\tesseract\ccutil;..\..\textCatch\tesseract\ccstruct;..\..\textCatch\tesseract\classify;..\..\textCatch\tesseract\cube;..\..\textCatch\tesseract\cutil;..\..\textCatch\tesseract\dict;..\..\textCatch\tesseract\neural_networks\runtime;..\..\textCatch\tesseract\textord;..\..\textCatch\tesseract\viewer;..\..\textCatch\tesseract\opencl;..\..\textCatch\tesseract\wordrec;..\..\vendor\liblept;..\..\textCatch\leptonica\src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../inc/ImgCatch;../../vendor/opencv/inc;..\..\textCatch\tesseract\vs2010\port;..\..\textCatch\tesseract\api;..\..\textCatch\tesseract\ccmain;..\..\textCatch\tesseract\ccutil;..\..\textCatch\tesseract\ccstruct;..\..\textCatch\tesseract\classify;..\..\textCatch\tesseract\cube;..\..\textCatch\tesseract\cutil;..\..\textCatch\tesseract\dict;..\..\textCatch\tesseract\neural_networks\runtime;..\..\textCatch\tesseract\textord;..\..\textCatch\tesseract\viewer;..\..\textCatch\tesseract\opencl;..\..\textCatch\tesseract\wordrec;..\..\vendor\liblept;..\..\textCatch\leptonica\src;../../vendor/opencv/src\modules\core\include;../../vendor/opencv/src\modules\imgproc\src</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
