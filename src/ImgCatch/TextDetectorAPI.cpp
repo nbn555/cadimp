@@ -328,7 +328,7 @@ void groupCharacterRects(vector<RotatedRect> &filteredRects, vector<vector<Rotat
 		groupedRects.push_back(aRectGroup);
 	}
 }
-
+#if 0
 void findTextOfLine(Mat &src, vector<vector<RotatedRect>> &groupedRects, tesseract::TessBaseAPI *ocr, vector<pair<string, RotatedRect>> &outText, std::string path = ""){
 	Mat outTextMat = src.clone();
 	for (size_t i = 0; i < groupedRects.size(); i++)
@@ -399,6 +399,7 @@ void findTextOfLine(Mat &src, vector<vector<RotatedRect>> &groupedRects, tessera
 
 }
 
+#endif
 std::wstring utf8_to_utf16(const std::string& utf8)
 {
 	std::vector<unsigned long> unicode;
@@ -480,7 +481,7 @@ void replaceAll(std::wstring& str, const std::wstring& from, const std::wstring&
 		start_pos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
 	}
 }
-void findTextOfLine(Mat &src, vector<vector<RotatedRect>> &groupedRects, tesseract::TessBaseAPI *ocr, vector<pair<string, RotatedRect>> &outText, std::string path = ""){
+void findTextOfLine(Mat &src, vector<vector<RotatedRect>> &groupedRects, tesseract::TessBaseAPI *ocr, vector<pair<string, RotatedRect>> &outText, std::string path/* = ""*/){
 	Mat outTextMat = src.clone();
 	for (size_t i = 0; i < groupedRects.size(); i++)
 	{
