@@ -183,6 +183,13 @@ void findCharacterRects(Mat& src, vector<RotatedRect> &filteredRects, std::strin
 		line(binaryMat, Point(l[0], l[1]), Point(l[2], l[3]), Scalar::all(0), 9);
 	}
 
+	for (size_t i = 0; i < contours.size(); i++)
+	{
+		RotatedRect rect = minAreaRect(contours[i]);
+		if (rect.size.height > src.rows / 10) {
+			drawContours(binaryMat, contours, i, Scalar::all(0), 9);
+		}
+	}
 	//imshow("source", src);
 	//imshow("detected lines", lineMat);
 	std::string newPath = path + "Detectedlines.jpg";
@@ -322,76 +329,6 @@ void groupCharacterRects(vector<RotatedRect> &filteredRects, vector<vector<Rotat
 	}
 }
 
-void findTextOfLine(Mat &src, vector<vector<RotatedRect>> &groupedRects, tesseract::TessBaseAPI *ocr, vector<pair<string, RotatedRect>> &outText, std::string path = ""){
-	Mat outTextMat = src.clone();
-	for (size_t i = 0; i < groupedRects.size(); i++)
-	{
-		Mat groupedRectMat = src.clone();
-		vector<RotatedRect> aRectGroup = groupedRects[i];
-		vector<Point> wordContour;
-		float angleTotal = 0;
-		float angle;
-		for (size_t j = 0; j < aRectGroup.size(); j++)
-		{
-			angle = aRectGroup[j].angle;
-			if (aRectGroup[j].size.width > aRectGroup[j].size.height) {
-				if (aRectGroup[j].angle == 0) {
-					angle = -90;
-				}
-				else {
-					angle += 90.0;
-				}
-			}
-			angleTotal += angle;
-			drawRotatedRectangle(groupedRectMat, aRectGroup[j]);
-			cv::Point2f vertices2f[4];
-			aRectGroup[j].points(vertices2f);
-
-			// Convert them so we can use them in a fillConvexPoly
-			for (int i = 0; i < 4; ++i) {
-				wordContour.push_back((Point)vertices2f[i]);
-			}
-		}
-
-		angle = angleTotal / aRectGroup.size();
-		namedWindow("rectangle", CV_WINDOW_NORMAL);
-		setWindowProperty("rectangle", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
-		imshow("rectangle", groupedRectMat);
-		//waitKey(0);
-		Mat cropped;
-		RotatedRect rect;
-		bool flag = cropByContour(src, wordContour, cropped, rect, angle);
-		if (!flag)
-		{
-			continue;
-		}
-		/*imshow("cropped", cropped);
-		waitKey(0);*/
-		string outTextStr;
-
-		// Set image data
-		ocr->SetImage(cropped.data, cropped.cols, cropped.rows, 3, cropped.step);
-
-		// Run Tesseract OCR on image
-		outTextStr = string(ocr->GetUTF8Text());
-		if (outTextStr.empty())
-		{
-			continue;
-		}
-		// print recognized text
-		cout << outTextStr << endl;
-
-		outTextStr.erase(std::remove(outTextStr.begin(), outTextStr.end(), '\n'), outTextStr.end());
-		putText(outTextMat, outTextStr, wordContour[0], FONT_HERSHEY_SIMPLEX, 1, Scalar(0, 0, 255));
-		outText.push_back(pair<string, RotatedRect>(outTextStr, rect));
-
-		//waitKey(0);
-	}
-	string newPath = path + "TextMat.jpg";
-	imwrite(newPath, outTextMat);
-
-}
-
 std::wstring utf8_to_utf16(const std::string& utf8)
 {
 	std::vector<unsigned long> unicode;
@@ -463,6 +400,90 @@ std::wstring utf8_to_utf16(const std::string& utf8)
 	}
 	return utf16;
 }
+
+void replaceAll(std::wstring& str, const std::wstring& from, const std::wstring& to) {
+	if (from.empty())
+		return;
+	size_t start_pos = 0;
+	while ((start_pos = str.find(from, start_pos)) != std::wstring::npos) {
+		str.replace(start_pos, from.length(), to);
+		start_pos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
+	}
+}
+void findTextOfLine(Mat &src, vector<vector<RotatedRect>> &groupedRects, tesseract::TessBaseAPI *ocr, vector<pair<string, RotatedRect>> &outText, std::string path = ""){
+	Mat outTextMat = src.clone();
+	for (size_t i = 0; i < groupedRects.size(); i++)
+	{
+		Mat groupedRectMat = src.clone();
+		vector<RotatedRect> aRectGroup = groupedRects[i];
+		vector<Point> wordContour;
+		float angleTotal = 0;
+		float angle;
+		for (size_t j = 0; j < aRectGroup.size(); j++)
+		{
+			angle = aRectGroup[j].angle;
+			if (aRectGroup[j].size.width > aRectGroup[j].size.height) {
+				if (aRectGroup[j].angle == 0) {
+					angle = -90;
+				}
+				else {
+					angle += 90.0;
+				}
+			}
+			angleTotal += angle;
+			drawRotatedRectangle(groupedRectMat, aRectGroup[j]);
+			cv::Point2f vertices2f[4];
+			aRectGroup[j].points(vertices2f);
+
+			// Convert them so we can use them in a fillConvexPoly
+			for (int i = 0; i < 4; ++i) {
+				wordContour.push_back((Point)vertices2f[i]);
+			}
+		}
+
+		angle = angleTotal / aRectGroup.size();
+		/*namedWindow("rectangle", CV_WINDOW_NORMAL);
+		setWindowProperty("rectangle", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
+		imshow("rectangle", groupedRectMat);*/
+		//waitKey(0);
+		Mat cropped;
+		RotatedRect rect;
+		bool flag = cropByContour(src, wordContour, cropped, rect, angle);
+		if (!flag)
+		{
+			continue;
+		}
+		//imshow("cropped", cropped);
+		//waitKey(0);
+		string outTextStr;
+
+		// Set image data
+		ocr->SetImage(cropped.data, cropped.cols, cropped.rows, 3, cropped.step);
+
+		// Run Tesseract OCR on image
+		outTextStr = ocr->GetUTF8Text();
+		outTextStr.erase(std::remove(outTextStr.begin(), outTextStr.end(), '\n'), outTextStr.end());
+		if (outTextStr.empty())
+		{
+			continue;
+		}
+		// print recognized text
+		cout << outTextStr << endl;
+		std::wstring sLogLevel = utf8_to_utf16(outTextStr);
+		//outTextStr.replace(outTextStr.begin(), outTextStr.end(), '¢', 'a');
+		replaceAll(sLogLevel, L"¢", L"phi");
+		replaceAll(sLogLevel, L"@", L"phi");
+		outTextStr = std::string(sLogLevel.begin(), sLogLevel.end());
+		putText(outTextMat, outTextStr, wordContour[0], FONT_HERSHEY_COMPLEX, 1, Scalar(0, 0, 255));
+		outText.push_back(pair<string, RotatedRect>(outTextStr, rect));
+
+		//waitKey(0);
+	}
+	string newPath = path + "TextMat.jpg";
+	imwrite(newPath, outTextMat);
+
+}
+
 /**********************************************************************
  *  main()
  *
@@ -472,7 +493,7 @@ bool detectText(Mat &src, vector<pair<string, RotatedRect>> &outText, std::strin
 	// Create Tesseract object
 	tesseract::TessBaseAPI *ocr = new tesseract::TessBaseAPI();
 	// Initialize tesseract to use English (eng) and the LSTM OCR engine. 
-	ocr->Init(g_traning_data_path.c_str(), "eng", tesseract::OEM_DEFAULT);
+	ocr->Init(g_traning_data_path.c_str(), "ngi+eng", tesseract::OEM_DEFAULT);
 	// Set Page segmentation mode to PSM_AUTO (3)
 	ocr->SetPageSegMode(tesseract::PSM_SINGLE_LINE);
 	//ocr->SetVariable("tessedit_char_whitelist", "φ0123456789abcdefjhijklmnopqrstuvwxyzABCDEFJHIJKLMNOPQRSTUVWXYZ.,+-");

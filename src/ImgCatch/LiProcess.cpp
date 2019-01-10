@@ -4,6 +4,7 @@
 #include "opencv2\imgproc\imgproc.hpp"
 #include "dirent.h"
 #include "shape_detection.h"
+#define DEBUG_FLAG
 using namespace cv;
 
 void removeBorder(Mat& src, Mat &removedBorderMat) {
@@ -97,7 +98,15 @@ void detectCircle1(Mat &src, vector<Point> intersectionPoints, vector<Vec3f> &ou
 	{
 		return;
 	}
-
+#ifdef DEBUG_FLAG
+	Mat intersectionPointMat = src.clone();
+	for (size_t i = 0; i < intersectionPoints.size(); i++)
+	{
+		circle(intersectionPointMat, intersectionPoints[i], 4, Scalar(0, 0, 255), 2);
+	}
+	imshow("intersectionPointMat", intersectionPointMat);
+	waitKey(0);
+#endif
 	int param2 = src.cols > 1000 ? 100 : (src.cols > 200 ? 50 : 30);
 
 	Mat src_gray;
@@ -120,19 +129,19 @@ void detectCircle1(Mat &src, vector<Point> intersectionPoints, vector<Vec3f> &ou
 		}
 		iterator++;
 	} while (!circles.empty() && iterator < 10);
-	//for (size_t i = 0; i < outCircles.size(); i++)
-	//{
-	//	/*outCircles[i][0] = outCircles[i][0] / scale;
-	//	outCircles[i][1] = outCircles[i][1] / scale;
-	//	outCircles[i][2] = outCircles[i][2] / scale;*/
-	//	Point center(cvRound(outCircles[i][0]), cvRound(outCircles[i][1]));
-	//	int radius = cvRound(outCircles[i][2]);
-	//	// circle center
-	//	circle(src, center, 3, Scalar(0, 255, 0), -1, 8, 0);
-	//	// circle outline
-	//	circle(src, center, radius, Scalar(0, 0, 255), 9, 8, 0);
-	//}
-	//imshow("src", src);
+	for (size_t i = 0; i < outCircles.size(); i++)
+	{
+		/*outCircles[i][0] = outCircles[i][0] / scale;
+		outCircles[i][1] = outCircles[i][1] / scale;
+		outCircles[i][2] = outCircles[i][2] / scale;*/
+		Point center(cvRound(outCircles[i][0]), cvRound(outCircles[i][1]));
+		int radius = cvRound(outCircles[i][2]);
+		// circle center
+		circle(src, center, 3, Scalar(0, 255, 0), -1, 8, 0);
+		// circle outline
+		circle(src, center, radius, Scalar(0, 0, 255), 9, 8, 0);
+	}
+	imshow("src", src);
 	//waitKey(0);
 	/*namedWindow("circles", CV_WINDOW_NORMAL);
 	setWindowProperty("circles", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);*/
@@ -155,8 +164,8 @@ void detectCircle2(Mat &src, vector<Vec3f> &outCircles, vector<Point> intersecti
 	{
 		circle(intersectionPointMat, intersectionPoints[i], 4, Scalar(0, 0, 255), 2);
 	}
-	namedWindow("intersectionPointMat", CV_WINDOW_NORMAL);
-	setWindowProperty("intersectionPointMat", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
+	/*namedWindow("intersectionPointMat", CV_WINDOW_NORMAL);
+	setWindowProperty("intersectionPointMat", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);*/
 	imshow("intersectionPointMat", intersectionPointMat);
 	waitKey();
 	//namedWindow("Original image", CV_WINDOW_AUTOSIZE);
@@ -183,8 +192,8 @@ void detectCircle2(Mat &src, vector<Vec3f> &outCircles, vector<Point> intersecti
 		{
 			circle(intersectionPointMat, intersectionPoints[i], 4, Scalar(0, 0, 255), 2);
 		}
-		namedWindow("intersectionPointMat", CV_WINDOW_NORMAL);
-		setWindowProperty("intersectionPointMat", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
+		/*namedWindow("intersectionPointMat", CV_WINDOW_NORMAL);
+		setWindowProperty("intersectionPointMat", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);*/
 		imshow("intersectionPointMat", intersectionPointMat);
 		waitKey();
 
@@ -235,7 +244,13 @@ void detectCircle(Mat &src, vector<Vec3f> &outCircles,vector<Point> intersection
 	double scale = 1720.0 / src.size().width;
 	//resizedMat = src.clone();
 	resize(src, resizedMat, cv::Size(), scale, scale, cv::INTER_AREA);
-	getIntersections(resizedMat, intersectionPoints, 1);
+	//getIntersections(resizedMat, intersectionPoints, 1);
+	for (size_t intersectionPointId = 0; intersectionPointId < intersectionPoints.size(); intersectionPointId++)
+	{
+		intersectionPoints[intersectionPointId].x *= scale;
+		intersectionPoints[intersectionPointId].y *= scale;
+	}
+#ifdef DEBUG_FLAG
 	Mat intersectionPointMat = resizedMat.clone();
 	for (size_t i = 0; i < intersectionPoints.size(); i++)
 	{
@@ -245,6 +260,7 @@ void detectCircle(Mat &src, vector<Vec3f> &outCircles,vector<Point> intersection
 	//setWindowProperty("intersectionPointMat", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
 	//imshow("intersectionPointMat", intersectionPointMat);
 	//waitKey();
+#endif
 	//namedWindow("Original image", CV_WINDOW_AUTOSIZE);
 	//imshow("Original image", src);
 	Mat grayMat, cannyMat;
@@ -298,7 +314,6 @@ void detectCircle(Mat &src, vector<Vec3f> &outCircles,vector<Point> intersection
 		waitKey(0);*/
 		croppedMat = blurMat(rect).clone();
 		/// Reduce the noise so we avoid false circle detection
-		string croppedName = std::to_string(contourId) + ".jpg";
 		cvtColor(croppedMat, croppedMat, CV_GRAY2BGR);
 		std:vector<Point> newIntersectionPoints(intersectionPoints.size());
 		for (size_t intersectionPointId = 0; intersectionPointId < intersectionPoints.size(); intersectionPointId++)
@@ -306,7 +321,10 @@ void detectCircle(Mat &src, vector<Vec3f> &outCircles,vector<Point> intersection
 			newIntersectionPoints[intersectionPointId].x = intersectionPoints[intersectionPointId].x - rect.x;
 			newIntersectionPoints[intersectionPointId].y = intersectionPoints[intersectionPointId].y - rect.y;
 		}
-		imwrite(croppedName, croppedMat);
+#ifdef DEBUG_FLAG
+		/*string croppedName = std::to_string(contourId) + ".jpg";
+		imwrite(croppedName, croppedMat);*/
+#endif // DEBUG_FLAG
 		vector<Vec3f> circles;
 		detectCircle1(croppedMat, newIntersectionPoints, circles);
 		int iterator = 0;
@@ -361,9 +379,10 @@ void detectCircle(Mat &src, vector<Vec3f> &outCircles,vector<Point> intersection
 		imwrite(circleName, croppedMat);*/
 		//waitKey(0);
 	}
+#ifdef DEBUG_FLAG
 	path += "circles.jpg";
 	imwrite(path, src);
-
+#endif // DEBUG_FLAG
 }
 // khoi tao ma tran 2 chieu kich thuoc size
 void CreateIntMatrix(int **&matrix, CvSize size) {

@@ -69,9 +69,9 @@ void thinningIteration(cv::Mat &img, int iter)
 			se = &(pBelow[x + 1]);
 
 			int A = (*no == 0 && *ne == 1) + (*ne == 0 && *ea == 1) +
-					(*ea == 0 && *se == 1) + (*se == 0 && *so == 1) +
-					(*so == 0 && *sw == 1) + (*sw == 0 && *we == 1) +
-					(*we == 0 && *nw == 1) + (*nw == 0 && *no == 1);
+				(*ea == 0 && *se == 1) + (*se == 0 && *so == 1) +
+				(*so == 0 && *sw == 1) + (*sw == 0 && *we == 1) +
+				(*we == 0 && *nw == 1) + (*nw == 0 && *no == 1);
 			int B = *no + *ne + *ea + *se + *so + *sw + *we + *nw;
 			int m1 = iter == 0 ? (*no * *ea * *so) : (*no * *ea * *we);
 			int m2 = iter == 0 ? (*ea * *so * *we) : (*no * *so * *we);
@@ -154,7 +154,7 @@ void getIntersections(Mat src, std::vector<cv::Point> &vtIntersectionPoints, int
 		// To increase accuracy, must use the following function
 		//cv::ximgproc::thinning(gray_image, thinning_image, cv::ximgproc::THINNING_GUOHALL);
 		cv::cornerHarris(thinning_image, dst, nBlockSize, 3, 0.04);
-		cv::normalize(dst, dst_norm, 0, 255, cv::NormTypes::NORM_MINMAX,CV_8UC1);
+		cv::normalize(dst, dst_norm, 0, 255, cv::NormTypes::NORM_MINMAX, CV_8UC1);
 
 		cv::threshold(dst_norm, dst_norm, 120, 255, CV_THRESH_BINARY);
 		cv::findContours(dst_norm, vtContours, vtHierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
@@ -189,7 +189,7 @@ double getDistance(const Point2f &point1, const Point2f &point2)
 }
 double getDistance2(const Point2f &point1, const Point2f &point2)
 {
-    return ((point1.x - point2.x)*(point1.x - point2.x) +(point1.y - point2.y)*(point1.y - point2.y));
+	return ((point1.x - point2.x)*(point1.x - point2.x) + (point1.y - point2.y)*(point1.y - point2.y));
 }
 // Calculate middle point
 cv::Point2f getMidPoint(const cv::Point2f &p1, const cv::Point2f &p2)
@@ -399,93 +399,158 @@ void detectLines(Mat src, vector<Vec4i> &lines)
 
 void detectLines(Mat src, vector<Vec4i> &lines)
 {
-    cv::Mat gray_image(src.size(), CV_8UC1, cv::Scalar(0));
-    cv::Mat edges_image(src.size(), CV_8UC1, cv::Scalar(0));
-    cv::Mat connected_image(src.size(), CV_8UC1, cv::Scalar(0));
-    int nRows = src.rows;
-    //int nNumberOfIteration = 3;
+	cv::Mat gray_image(src.size(), CV_8UC1, cv::Scalar(0));
+	cv::Mat edges_image(src.size(), CV_8UC1, cv::Scalar(0));
+	cv::Mat connected_image(src.size(), CV_8UC1, cv::Scalar(0));
+	int nRows = src.rows;
+	//int nNumberOfIteration = 3;
 
-    cv::cvtColor(src, gray_image, CV_BGR2GRAY);
-    gray_image = cv::Scalar::all(255) - gray_image;
-    cv::threshold(gray_image, gray_image, 0, 255, CV_THRESH_BINARY + CV_THRESH_OTSU);
-    //cv::GaussianBlur(gray_image, gray_image, cv::Size(3, 3), 0);
+	cv::cvtColor(src, gray_image, CV_BGR2GRAY);
+	gray_image = cv::Scalar::all(255) - gray_image;
+	cv::threshold(gray_image, gray_image, 0, 255, CV_THRESH_BINARY + CV_THRESH_OTSU);
+	//cv::GaussianBlur(gray_image, gray_image, cv::Size(3, 3), 0);
 
-    auto nLabels = cv::connectedComponents(gray_image, connected_image);
+	auto nLabels = cv::connectedComponents(gray_image, connected_image);
 
-    cv::Mat dst_image(src.size(), CV_8UC1, cv::Scalar(0));
-    cv::Mat temp_image(dst_image.size(), dst_image.type(), cv::Scalar(0));
-    std::vector<std::vector<Point>> vtContours;
-    std::vector<Vec4i> vtHierarchy;
-    cv::Point2f rect_points[4];
-    std::vector<std::vector<Point>> vtCnt(1);
-    vtCnt[0].resize(5);
-    std::vector<cv::Point>* vtRectCnt = &vtCnt[0];
-    double distance2;
-    for (auto i = 1; i < nLabels; i++)
-    {
-        
-        cv::inRange(connected_image, cv::Scalar(i), cv::Scalar(i), dst_image);
-        //Step 1: Get all separate lines
+	cv::Mat dst_image(src.size(), CV_8UC1, cv::Scalar(0));
+	cv::Mat temp_image(dst_image.size(), dst_image.type(), cv::Scalar(0));
+	std::vector<std::vector<Point>> vtContours;
+	std::vector<Vec4i> vtHierarchy;
+	cv::Point2f rect_points[4];
+	std::vector<std::vector<Point>> vtCnt(1);
+	vtCnt[0].resize(5);
+	std::vector<cv::Point>* vtRectCnt = &vtCnt[0];
+	double distance2;
+	for (auto i = 1; i < nLabels; i++)
+	{
 
-        bool check = false;
-        vtContours.clear();
-        vtHierarchy.clear();
-        cv::findContours(dst_image, vtContours, vtHierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
-        for (auto &&cnt : vtContours)
-        {
-            if (cv::arcLength(cnt, false) >= 5)
-            {
-                auto rect = cv::minAreaRect(cv::Mat(cnt));
-                auto index = 0;
-                
-                rect.points(rect_points);
+		cv::inRange(connected_image, cv::Scalar(i), cv::Scalar(i), dst_image);
+		//Step 1: Get all separate lines
 
-                if (getDistance2(rect_points[0], rect_points[1]) >= getDistance2(rect_points[1], rect_points[2]))
-                {
-                    index = 1;
-                }
-                auto dDistance = getDistance2(rect_points[index], rect_points[index + 1]);
-                if (dDistance < 49.0 && dDistance >= 1.0)
-                {
-                    /*if (getDistance(rect_points[index], rect_points[index + 1]) < 10.0)
-                    {*/
-                        
-                        for(int i1 = 0; i1 < 4; ++i1)
-                        {
-                            vtRectCnt->at(i1) = cv::Point((int)rect_points[i1].x, (int)rect_points[i1].y);
-                        }
-                        vtRectCnt->at(4) = (cv::Point((int)rect_points[0].x, (int)rect_points[0].y));
+		bool check = false;
+		vtContours.clear();
+		vtHierarchy.clear();
+		cv::findContours(dst_image, vtContours, vtHierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
+		for (auto &&cnt : vtContours)
+		{
+			if (cv::arcLength(cnt, false) >= 5)
+			{
+				auto rect = cv::minAreaRect(cv::Mat(cnt));
+				auto index = 0;
 
-                        cv::drawContours(temp_image, vtCnt, 0, cv::Scalar(255), -1);
-                        check = true;
-                        auto p1 = getMidPoint(rect_points[index], rect_points[index + 1]);
-                        auto p2 = getMidPoint(rect_points[index + 2], rect_points[(index + 3) % 4]);
+				rect.points(rect_points);
 
-                        lines.push_back(Vec4i(p1.x, p1.y, p2.x, p2.y));
-                  //  }
-                }
-            }
-        }
+				if (getDistance2(rect_points[0], rect_points[1]) >= getDistance2(rect_points[1], rect_points[2]))
+				{
+					index = 1;
+				}
+				auto dDistance = getDistance2(rect_points[index], rect_points[index + 1]);
+				if (dDistance < 49.0 && dDistance >= 1.0)
+				{
+					/*if (getDistance(rect_points[index], rect_points[index + 1]) < 10.0)
+					{*/
 
-        if (check)
-        {
-            cv::bitwise_and(dst_image, temp_image, temp_image);
-            dst_image = dst_image - temp_image;
-        }
+					for (int i1 = 0; i1 < 4; ++i1)
+					{
+						vtRectCnt->at(i1) = cv::Point((int)rect_points[i1].x, (int)rect_points[i1].y);
+					}
+					vtRectCnt->at(4) = (cv::Point((int)rect_points[0].x, (int)rect_points[0].y));
 
-        // Step 2:
-        std::vector<cv::Vec4i> vtlines;
-        //cv::Mat gray_temp_image(gray_image.size(), gray_image.type(), Scalar(0));
+					cv::drawContours(temp_image, vtCnt, 0, cv::Scalar(255), -1);
+					check = true;
+					auto p1 = getMidPoint(rect_points[index], rect_points[index + 1]);
+					auto p2 = getMidPoint(rect_points[index + 2], rect_points[(index + 3) % 4]);
 
-        //		cv::ximgproc::thinning(gray_image, temp_image);
-        //thinning(gray_image, temp_image);
-        cv::HoughLinesP(dst_image, vtlines, 1, CV_PI / 180, 5, 5, 5);
-        if (vtlines.size() > 0)
-        {
-            lines.insert(lines.end(), vtlines.begin(), vtlines.end());
-        }
-    }
+					lines.push_back(Vec4i(p1.x, p1.y, p2.x, p2.y));
+					//  }
+				}
+			}
+		}
 
+		if (check)
+		{
+			cv::bitwise_and(dst_image, temp_image, temp_image);
+			dst_image = dst_image - temp_image;
+		}
+
+		// Step 2:
+		std::vector<cv::Vec4i> vtlines;
+		//cv::Mat gray_temp_image(gray_image.size(), gray_image.type(), Scalar(0));
+
+		//		cv::ximgproc::thinning(gray_image, temp_image);
+		//thinning(gray_image, temp_image);
+		cv::HoughLinesP(dst_image, vtlines, 1, CV_PI / 180, 5, 5, 5);
+		if (vtlines.size() > 0)
+		{
+			lines.insert(lines.end(), vtlines.begin(), vtlines.end());
+		}
+	}
+
+}
+
+void detectArrows(Mat src, vector<vector<Point2f>> &vtArrows, const double &standard_area = 400.0, const double &standard_ratio = 0.5)
+{
+	printf("%f\n", standard_area);
+	Mat gray_image(src.size(), CV_8UC1, Scalar(0));
+	Mat black_hat_image(src.size(), CV_8UC1, Scalar(0));
+	Mat kernel1(2, 2, CV_8UC1, Scalar(1));
+	Mat kernel2(3, 3, CV_8UC1, Scalar(1));
+	vector<vector<Point>> vtContours;
+	vector<Vec4i> vtHierarchy;
+
+	if (src.channels() > 2)
+	{
+		cvtColor(src, gray_image, COLOR_BGR2GRAY);
+	}
+	else
+	{
+		gray_image = src;
+	}
+
+	threshold(gray_image, gray_image, 0, 255, CV_THRESH_BINARY + CV_THRESH_OTSU);
+	// Apply the following formula: inverted threshold image - black hat of image.
+	dilate(gray_image, black_hat_image, kernel1);
+	erode(black_hat_image, black_hat_image, kernel1);
+	black_hat_image = (255 - gray_image) - (black_hat_image - gray_image);
+
+	erode(black_hat_image, black_hat_image, kernel2);
+	dilate(black_hat_image, black_hat_image, kernel2);
+
+	cv::findContours(black_hat_image, vtContours, vtHierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+	auto index = 0;
+	for (auto &&cnt : vtContours)
+	{
+		vector<Point2f> triangle;
+		minEnclosingTriangle(cnt, triangle);
+		if (triangle.size() > 0)
+		{
+			auto cnt_area = contourArea(cnt);
+			auto triangle_area = abs(triangle[0].x * (triangle[1].y - triangle[2].y) +
+				triangle[1].x * (triangle[2].y - triangle[0].y) +
+				triangle[2].x * (triangle[0].y - triangle[1].y)) /
+				2;
+			if (triangle_area > 0.0)
+			{
+				// Get ratio between boundary triangle area and region area
+				auto ratio = cnt_area / triangle_area;
+				// Compare with conditions.
+				if (ratio >= standard_ratio && cnt_area <= standard_area)
+				{
+					RotatedRect rect = minAreaRect(cnt);
+					cv::Point2f vertices2f[4];
+					rect.points(vertices2f);
+					auto edge_1 = getDistance2(vertices2f[0], vertices2f[1]);
+					auto edge_2 = getDistance2(vertices2f[2], vertices2f[1]);
+					auto max_value = std::max(edge_1, edge_2);
+					auto min_value = std::min(edge_1, edge_2);
+					if (max_value / min_value <= 16.0)
+					{
+						vtArrows.push_back(triangle);
+					}
+				}
+			}
+		}
+	}
 }
 
 #endif
@@ -503,9 +568,9 @@ void getLines(Mat src, std::vector<sline> &lines)
 
 	/*imshow("result", result);
 
-    cv::imshow("src", invSrc);
-    cv::imshow("dst", bw);
-    cv::waitKey();*/
+	cv::imshow("src", invSrc);
+	cv::imshow("dst", bw);
+	cv::waitKey();*/
 
 	Mat cdst;
 	cvtColor(bw, cdst, COLOR_GRAY2BGR);
