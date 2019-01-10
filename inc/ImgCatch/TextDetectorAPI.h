@@ -10,4 +10,5 @@
 //extern std::string g_traning_data_path;
 void setMinHeightText(int h);
 void setTrainingDataPath(const std::string &str);
+void detectTextOfFolder(const std::string &path);
 bool detectText(cv::Mat &im, std::vector<std::pair<std::string, cv::RotatedRect>> &outText, std::string path = "");

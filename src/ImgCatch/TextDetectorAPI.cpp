@@ -58,17 +58,17 @@ void setMinHeightText(int h)
     g_min_height_text = h;
 }
 
-void testFolder(const string &path) {
+void detectTextOfFolder(const std::string &path) {
 	DIR *pDIR;
 	struct dirent *entry;
 	//Mat original_mat;
-	string full_path;
+	std::string full_path;
 	if (pDIR = opendir(path.c_str())) {
 		while (entry = readdir(pDIR)) {
 			if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
-				string newPath = path + "\\" + entry->d_name;
+				std::string newPath = path + "\\" + entry->d_name;
 				if (entry->d_type == DT_DIR) {
-					testFolder(newPath);
+					detectTextOfFolder(newPath);
 					continue;
 				}
 				Mat src, src_gray;
@@ -81,7 +81,7 @@ void testFolder(const string &path) {
 				}
 				Mat removedBorderMat;
 				removeBorder(src, removedBorderMat);
-				vector<pair<string, RotatedRect>> outText;
+				vector<pair<std::string, RotatedRect>> outText;
 				detectText(removedBorderMat, outText, newPath);
 			}
 		}

@@ -2,7 +2,7 @@
 
 #include "opencv2\highgui\highgui.hpp"
 #include "opencv2\imgproc\imgproc.hpp"
-//#include "dirent.h"
+#include "dirent.h"
 #include "shape_detection.h"
 using namespace cv;
 
@@ -50,38 +50,42 @@ void removeBorder(Mat& src, Mat &removedBorderMat) {
 		//imwrite("removedMat.jpg", contourMat);
 	}
 }
-//void testFolder(const string &path) {
-//	DIR *pDIR;
-//	struct dirent *entry;
-//	//Mat original_mat;
-//	string full_path;
-//
-//
-//
-//	if (pDIR = opendir(path.c_str())) {
-//		while (entry = readdir(pDIR)) {
-//			if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
-//				string newPath = path + "\\" + entry->d_name;
-//				if (entry->d_type == DT_DIR) {
-//					testFolder(newPath);
-//					continue;
-//				}
-//				Mat src, src_gray;
-//
-//				/// Read the image
-//				src = imread(newPath);
-//				if (!src.data)
-//				{
-//					continue;
-//				}
-//				vector<Vec3f> outCircles;
-//				//detectCircle(src, outCircles, newPath);
-//			}
-//		}
-//		closedir(pDIR);
-//		delete entry;
-//	}
-//}
+void detectCircleOfFolder(const string &path){
+	DIR *pDIR;
+	struct dirent *entry;
+	//Mat original_mat;
+	string full_path;
+
+
+
+	if (pDIR = opendir(path.c_str())) {
+		while (entry = readdir(pDIR)) {
+			if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
+				string newPath = path + "\\" + entry->d_name;
+				if (entry->d_type == DT_DIR) {
+					detectCircleOfFolder(newPath);
+					continue;
+				}
+				Mat src, src_gray;
+
+				/// Read the image
+				src = imread(newPath);
+				if (!src.data)
+				{
+					continue;
+				}
+				Mat removedBorderMat;
+				removeBorder(src, removedBorderMat);
+				vector<Vec3f> outCircles;
+				vector<Point> intersectionPoints;
+				detectCircle(removedBorderMat, outCircles,intersectionPoints , newPath);
+				//(Mat &src, vector<Vec3f> &outCircles, vector<Point> intersectionPoints, string path) {
+			}
+		}
+		closedir(pDIR);
+		delete entry;
+	}
+}
 
 void detectCircle1(Mat &src, vector<Point> intersectionPoints, vector<Vec3f> &outCircles) {
 	if (!src.data)
@@ -104,7 +108,7 @@ void detectCircle1(Mat &src, vector<Point> intersectionPoints, vector<Vec3f> &ou
 	do
 	{
 		std::vector<Point> newIntersectionPoints = intersectionPoints;
-		HoughCircles(src_gray, circles, newIntersectionPoints, HOUGH_GRADIENT, 1, src_gray.rows / 8, 200, param2, 0, 0);
+		HoughCircles(src_gray, circles/*, newIntersectionPoints*/, HOUGH_GRADIENT, 1, src_gray.rows / 8, 200, param2, 0, 0);
 
 		/// Draw the circles detected
 		for (size_t i = 0; i < circles.size(); i++)
@@ -237,10 +241,10 @@ void detectCircle(Mat &src, vector<Vec3f> &outCircles,vector<Point> intersection
 	{
 		circle(intersectionPointMat, intersectionPoints[i], 4, Scalar(0, 0, 255), 2);
 	}
-	namedWindow("intersectionPointMat", CV_WINDOW_NORMAL);
-	setWindowProperty("intersectionPointMat", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
-	imshow("intersectionPointMat", intersectionPointMat);
-	waitKey();
+	//namedWindow("intersectionPointMat", CV_WINDOW_NORMAL);
+	//setWindowProperty("intersectionPointMat", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
+	//imshow("intersectionPointMat", intersectionPointMat);
+	//waitKey();
 	//namedWindow("Original image", CV_WINDOW_AUTOSIZE);
 	//imshow("Original image", src);
 	Mat grayMat, cannyMat;
