@@ -4,7 +4,7 @@
 #include "opencv2\imgproc\imgproc.hpp"
 #include "dirent.h"
 #include "shape_detection.h"
-#define DEBUG_FLAG
+//#define DEBUG_FLAG
 using namespace cv;
 
 void removeBorder(Mat& src, Mat &removedBorderMat) {
