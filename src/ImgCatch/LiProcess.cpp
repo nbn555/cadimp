@@ -117,6 +117,7 @@ void detectCircle1(Mat &src, vector<Point> intersectionPoints, vector<Vec3f> &ou
 	bool useInterPoint = intersectionPoints.empty() ? false : true;
 	do
 	{
+		circles.clear();
 		std::vector<Point> newIntersectionPoints = intersectionPoints;
 		if (useInterPoint)
 		{
@@ -136,18 +137,18 @@ void detectCircle1(Mat &src, vector<Point> intersectionPoints, vector<Vec3f> &ou
 		}
 		iterator++;
 	} while (!circles.empty() && iterator < 10);
-	for (size_t i = 0; i < outCircles.size(); i++)
-	{
-		/*outCircles[i][0] = outCircles[i][0] / scale;
-		outCircles[i][1] = outCircles[i][1] / scale;
-		outCircles[i][2] = outCircles[i][2] / scale;*/
-		Point center(cvRound(outCircles[i][0]), cvRound(outCircles[i][1]));
-		int radius = cvRound(outCircles[i][2]);
-		// circle center
-		circle(src, center, 3, Scalar(0, 255, 0), -1, 8, 0);
-		// circle outline
-		circle(src, center, radius, Scalar(0, 0, 255), 9, 8, 0);
-	}
+	//for (size_t i = 0; i < outCircles.size(); i++)
+	//{
+	//	/*outCircles[i][0] = outCircles[i][0] / scale;
+	//	outCircles[i][1] = outCircles[i][1] / scale;
+	//	outCircles[i][2] = outCircles[i][2] / scale;*/
+	//	Point center(cvRound(outCircles[i][0]), cvRound(outCircles[i][1]));
+	//	int radius = cvRound(outCircles[i][2]);
+	//	// circle center
+	//	circle(src, center, 3, Scalar(0, 255, 0), -1, 8, 0);
+	//	// circle outline
+	//	circle(src, center, radius, Scalar(0, 0, 255), 9, 8, 0);
+	//}
 	//imshow("src", src);
 	//waitKey(0);
 	/*namedWindow("circles", CV_WINDOW_NORMAL);
@@ -239,6 +240,22 @@ void detectCircle2(Mat &src, vector<Vec3f> &outCircles, vector<Point> intersecti
 	imwrite(path, src);*/
 	//waitKey(0);
 
+}
+
+void addToCircles(vector<Vec3f> &outCircles, Vec3f circle) {
+	const float minDis = 7.0;
+	for (int i = 0; i < outCircles.size(); i++) {
+		if (abs(outCircles[i][0] - circle[0]) < minDis && 
+			abs(outCircles[i][1] - circle[1]) < minDis &&
+			abs(outCircles[i][2] - circle[2]) < minDis)
+		{
+			outCircles[i][0] = (outCircles[i][0] + circle[0]) / 2;
+			outCircles[i][1] = (outCircles[i][1] + circle[1]) / 2;
+			outCircles[i][2] = (outCircles[i][2] + circle[2]) / 2;
+			return;
+		}
+	}
+	outCircles.push_back(circle);
 }
 
 void detectCircle(Mat &src, vector<Vec3f> &outCircles,vector<Point> intersectionPoints, string path) {
@@ -337,7 +354,10 @@ void detectCircle(Mat &src, vector<Vec3f> &outCircles,vector<Point> intersection
 		int iterator = 0;
 		for (size_t i = 0; i < circles.size(); i++)
 		{
-
+			if (circles[i][2] <= 5)
+			{
+				continue;
+			}
 			Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
 			int radius = cvRound(circles[i][2]);
 			//// circle center
@@ -366,13 +386,8 @@ void detectCircle(Mat &src, vector<Vec3f> &outCircles,vector<Point> intersection
 			circles[i][0] = (rect.x + circles[i][0]) / scale;
 			circles[i][1] = (rect.y + circles[i][1]) / scale;
 			circles[i][2] = circles[i][2] / scale;
-			outCircles.push_back(circles[i]);
-			center = Point(cvRound(circles[i][0]), cvRound(circles[i][1]));
-			radius = cvRound(circles[i][2]);
-			// circle center
-			circle(src, center, 3, Scalar(0, 255, 0), -1, 8, 0);
-			// circle outline
-			circle(src, center, radius, Scalar(0, 0, 255), 9, 8, 0);
+			addToCircles(outCircles, circles[i]);
+			//outCircles.push_back(circles[i]);
 		}
 
 		/// Show your results
@@ -385,6 +400,15 @@ void detectCircle(Mat &src, vector<Vec3f> &outCircles,vector<Point> intersection
 		string circleName = std::to_string(i) + "circle.jpg";
 		imwrite(circleName, croppedMat);*/
 		//waitKey(0);
+	}
+	for (size_t i = 0; i < outCircles.size(); i++)
+	{
+		Point center = Point(cvRound(outCircles[i][0]), cvRound(outCircles[i][1]));
+		int radius = cvRound(outCircles[i][2]);
+		// circle center
+		circle(src, center, 3, Scalar(0, 255, 0), -1, 8, 0);
+		// circle outline
+		circle(src, center, radius, Scalar(0, 0, 255), 1, 8, 0);
 	}
 #ifdef DEBUG_FLAG_
 	path += "circles.jpg";

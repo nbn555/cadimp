@@ -41,7 +41,7 @@
 #include "LiProcess.h"
 #include <algorithm>
 
-#define SHOW_DEBUG_
+//#define SHOW_DEBUG_
 
 using namespace std;
 using namespace cv;
