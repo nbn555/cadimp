@@ -1395,7 +1395,7 @@ protected:
             }
 
             // Check if the circle has enough support
-//            if(maxCount > accThreshold)
+            if(maxCount > accThreshold)
             {
                 circlesLocal.push_back(EstimatedCircle(Vec3f(curCenter.x, curCenter.y, rBest), maxCount));
             }
