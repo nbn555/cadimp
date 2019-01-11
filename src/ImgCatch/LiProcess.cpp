@@ -4,7 +4,7 @@
 #include "opencv2\imgproc\imgproc.hpp"
 #include "dirent.h"
 #include "shape_detection.h"
-//#define DEBUG_FLAG
+#define DEBUG_FLAG_
 using namespace cv;
 
 void removeBorder(Mat& src, Mat &removedBorderMat) {
@@ -114,10 +114,17 @@ void detectCircle1(Mat &src, vector<Point> intersectionPoints, vector<Vec3f> &ou
 	outCircles.clear();
 	vector<Vec3f> circles;
 	int iterator = 0;
+	bool useInterPoint = intersectionPoints.empty() ? false : true;
 	do
 	{
 		std::vector<Point> newIntersectionPoints = intersectionPoints;
-		HoughCircles(src_gray, circles/*, newIntersectionPoints*/, HOUGH_GRADIENT, 1, src_gray.rows / 8, 200, param2, 0, 0);
+		if (useInterPoint)
+		{
+			HoughCircles(src_gray, circles, newIntersectionPoints, HOUGH_GRADIENT, 1, src_gray.rows / 8, 200, param2, 0, 0);
+		}
+		else {
+			HoughCircles(src_gray, circles, HOUGH_GRADIENT, 1, src_gray.rows / 8, 200, param2, 0, 0);
+		}
 
 		/// Draw the circles detected
 		for (size_t i = 0; i < circles.size(); i++)
@@ -141,7 +148,7 @@ void detectCircle1(Mat &src, vector<Point> intersectionPoints, vector<Vec3f> &ou
 		// circle outline
 		circle(src, center, radius, Scalar(0, 0, 255), 9, 8, 0);
 	}
-	imshow("src", src);
+	//imshow("src", src);
 	//waitKey(0);
 	/*namedWindow("circles", CV_WINDOW_NORMAL);
 	setWindowProperty("circles", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);*/
@@ -379,7 +386,7 @@ void detectCircle(Mat &src, vector<Vec3f> &outCircles,vector<Point> intersection
 		imwrite(circleName, croppedMat);*/
 		//waitKey(0);
 	}
-#ifdef DEBUG_FLAG
+#ifdef DEBUG_FLAG_
 	path += "circles.jpg";
 	imwrite(path, src);
 #endif // DEBUG_FLAG
