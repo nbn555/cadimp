@@ -41,13 +41,14 @@
 #include "LiProcess.h"
 #include <algorithm>
 
-//#define SHOW_DEBUG_
+//#define SHOW_DEBUG
 
 using namespace std;
 using namespace cv;
 
 std::string g_traning_data_path;
 int g_min_height_text = 5;
+int g_min_size_text = 15;
 
 void setTrainingDataPath(const std::string &str) {
     g_traning_data_path = str;
@@ -105,7 +106,10 @@ bool cropByContour(Mat &src, vector<Point2i> &contour, Mat &cropped, RotatedRect
 		else {
 			rect.angle += 90.0;
 		}
-		swap(rect.size.width, rect.size.height);
+		if (abs(rect.angle - angle) <= 45)
+		{
+			swap(rect.size.width, rect.size.height);
+		}
 	}
 	if (abs(rect.angle - angle) > 45)
 	{
@@ -121,7 +125,7 @@ bool cropByContour(Mat &src, vector<Point2i> &contour, Mat &cropped, RotatedRect
 	warpAffine(src, rotated, M, src.size(), INTER_CUBIC);//INTER_LANCSOZ4
 	// crop the resulting image
 	getRectSubPix(rotated, rect_size, rect.center, cropped);
-	Mat extendMat(cropped.rows * 2, cropped.cols * 2, CV_8UC3, Scalar::all(255));
+	Mat extendMat(cropped.rows * 2.5, cropped.cols * 2.5, CV_8UC3, Scalar::all(255));
 	if (cropped.rows == 0 || cropped.cols == 0)
 	{
 		return false;
@@ -225,7 +229,8 @@ void findCharacterRects(Mat& src, vector<RotatedRect> &filteredRects, std::strin
 		}
 
 		// added by Nghi: Skip small rectangle
-		if (min(rect.size.width, rect.size.height) < g_min_height_text)
+		if (min(rect.size.width, rect.size.height) < g_min_height_text
+			|| max(rect.size.width, rect.size.height) < g_min_size_text)
 			continue;
 
 		filteredRects.push_back(rect);
@@ -250,7 +255,7 @@ void findNearRects(std::vector<RotatedRect> &rects, std::vector<RotatedRect> &ol
 			waitKey(0);
 #endif // SHOW_DEBUG
 						//Don't group rectangles having angles are difference too much
-			if (abs(rect->angle - aRect->angle) > 45)
+			if (abs(rect->angle - aRect->angle) > 65 && abs(abs(rect->angle - aRect->angle) - 90) > 10)
 			{
 				continue;
 			}
@@ -481,6 +486,34 @@ void replaceAll(std::wstring& str, const std::wstring& from, const std::wstring&
 		start_pos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
 	}
 }
+
+void splitLines(char* str, std::vector<std::string> &splittedStrs)
+{
+	// Returns first token  
+	char *token = strtok(str, "\n");
+
+	// Keep printing tokens while one of the 
+	// delimiters present in str[]. 
+	while (token != NULL)
+	{
+		std::string subStr(token);
+		if (!subStr.empty())
+		{
+			splittedStrs.push_back(std::string(token));
+		}
+		token = strtok(NULL, " ");
+	}
+}
+
+void replaceChar(string& str) {
+	str.erase(std::remove(str.begin(), str.end(), '\n'), str.end());
+	std::wstring sLogLevel = utf8_to_utf16(str);
+	//outTextStr.replace(outTextStr.begin(), outTextStr.end(), '¢', 'a');
+	replaceAll(sLogLevel, L"¢", L"phi");
+	replaceAll(sLogLevel, L"@", L"phi");
+	str = std::string(sLogLevel.begin(), sLogLevel.end());
+}
+
 void findTextOfLine(Mat &src, vector<vector<RotatedRect>> &groupedRects, tesseract::TessBaseAPI *ocr, vector<pair<string, RotatedRect>> &outText, std::string path/* = ""*/){
 	Mat outTextMat = src.clone();
 	for (size_t i = 0; i < groupedRects.size(); i++)
@@ -524,35 +557,137 @@ void findTextOfLine(Mat &src, vector<vector<RotatedRect>> &groupedRects, tessera
 		{
 			continue;
 		}
-		//imshow("cropped", cropped);
-		//waitKey(0);
-		string outTextStr;
-
+#ifdef SHOW_DEBUG
+		/*imshow("cropped", cropped);
+		waitKey(0);*/
+		string croppedName = path + std::to_string(i) + ".jpg";
+		imwrite(croppedName, cropped);
+#endif
 		// Set image data
+		/*if ()
+		{
+			ocr->SetPageSegMode(tesseract::PSM_SINGLE_CHAR);
+		}
+		else*/ if (aRectGroup.size() == 1 || cropped.cols > cropped.rows){
+			ocr->SetPageSegMode(tesseract::PSM_SINGLE_LINE);
+		}
+		else {
+			ocr->SetPageSegMode(tesseract::PSM_SPARSE_TEXT);
+		}
 		ocr->SetImage(cropped.data, cropped.cols, cropped.rows, 3, cropped.step);
 
 		// Run Tesseract OCR on image
-		outTextStr = ocr->GetUTF8Text();
-		outTextStr.erase(std::remove(outTextStr.begin(), outTextStr.end(), '\n'), outTextStr.end());
-		if (outTextStr.empty())
+		char* outTextCh = ocr->GetUTF8Text();
+		if (!outTextCh)
 		{
 			continue;
 		}
+		std::vector<std::string> textLines;
+		splitLines(outTextCh, textLines);
+		//outTextStr.erase(std::remove(outTextStr.begin(), outTextStr.end(), '\n'), outTextStr.end());
 		// print recognized text
-		cout << outTextStr << endl;
-		std::wstring sLogLevel = utf8_to_utf16(outTextStr);
-		//outTextStr.replace(outTextStr.begin(), outTextStr.end(), '¢', 'a');
-		replaceAll(sLogLevel, L"¢", L"phi");
-		replaceAll(sLogLevel, L"@", L"phi");
-		outTextStr = std::string(sLogLevel.begin(), sLogLevel.end());
-		putText(outTextMat, outTextStr, wordContour[0], FONT_HERSHEY_COMPLEX, 1, Scalar(0, 0, 255));
-		outText.push_back(pair<string, RotatedRect>(outTextStr, rect));
-
+		//cout << outTextStr << endl;
+		for (int textLineId = 0; textLineId < textLines.size(); textLineId++)
+		{
+			textLines[textLineId].erase(std::remove(textLines[textLineId].begin(), textLines[textLineId].end(), '\n'), textLines[textLineId].end());
+			if (textLines[textLineId].empty())
+			{
+				textLines.erase(textLines.begin() + textLineId);
+				textLineId--;
+			}
+		}
+		if (textLines.empty())
+		{
+			continue;
+		}
+		Point2f points[4];
+		rect.points(points);
+		if (textLines.size() == 1)
+		{
+			string outTextStr = outTextCh;
+			replaceChar(outTextStr);
+			putText(outTextMat, outTextStr, wordContour[0], FONT_HERSHEY_COMPLEX, 1, Scalar(0, 0, 255));
+			outText.push_back(pair<string, RotatedRect>(outTextStr, rect));
+			continue;
+		}
+		
+		Point2f rectPoints[4];
+		rect.points(rectPoints);
+		RotatedRect rect1, rect2;
+		if (rect.size.width > rect.size.height)
+		{
+			Point2f newSize = rectPoints[3] - rectPoints[0];
+			newSize.x *= 0.4;
+			newSize.y *= 0.4;
+			Point2f newPoint = rectPoints[0] + newSize;
+			std::vector<Point> newPoints;
+			newPoints.push_back(newPoint);
+			newPoints.push_back(rectPoints[0]);
+			newPoints.push_back(rectPoints[1]);
+			rect1 = minAreaRect(newPoints);
+			
+			newPoint = rectPoints[3] - newSize;
+			newPoints.clear();
+			newPoints.push_back(newPoint);
+			newPoints.push_back(rectPoints[2]);
+			newPoints.push_back(rectPoints[3]);
+			rect2 = minAreaRect(newPoints);
+		}
+		else
+		{
+			Point2f newSize = rectPoints[1] - rectPoints[0];
+			newSize.x *= 0.4;
+			newSize.y *= 0.4;
+			Point2f newPoint = rectPoints[0] + newSize;
+			std::vector<Point> newPoints;
+			newPoints.push_back(newPoint);
+			newPoints.push_back(rectPoints[0]);
+			newPoints.push_back(rectPoints[3]);
+			rect2 = minAreaRect(newPoints);
+			
+			newPoint = rectPoints[1] - newSize;
+			newPoints.clear();
+			newPoints.push_back(newPoint);
+			newPoints.push_back(rectPoints[1]);
+			newPoints.push_back(rectPoints[2]);
+			rect1 = minAreaRect(newPoints);
+		}
+		Mat binaryMat;
+		cvtColor(cropped, binaryMat, COLOR_BGR2GRAY);
+		threshold(binaryMat, binaryMat, 100, 255, THRESH_BINARY_INV);
+		/*imshow("binary", binaryMat);
+		waitKey();*/
+		vector<Point> nonZeroPoints;
+		findNonZero(binaryMat, nonZeroPoints);
+		Rect nonZeroRect = boundingRect(nonZeroPoints);
+		Mat cropped1 = cropped(Rect(0,0,cropped.cols, nonZeroRect.y + nonZeroRect.height*0.4));
+		Mat cropped2 = cropped(Rect(0, nonZeroRect.y + nonZeroRect.height*0.6, cropped.cols, cropped.rows - (nonZeroRect.y + nonZeroRect.height*0.6)));
+		ocr->SetPageSegMode(tesseract::PSM_SINGLE_LINE);
+		ocr->SetImage(cropped1.data, cropped1.cols, cropped1.rows, 3, cropped1.step);
+		string str1 = ocr->GetUTF8Text();
+		replaceChar(str1);
+		ocr->SetImage(cropped2.data, cropped2.cols, cropped2.rows, 3, cropped2.step);
+		string str2 = ocr->GetUTF8Text();
+		replaceChar(str2);
+		/*imshow("cropped1", cropped1);
+		imshow("cropped2", cropped2);
+		waitKey();*/
+		if (!str1.empty())
+		{
+			putText(outTextMat, str1, rect1.center, FONT_HERSHEY_COMPLEX, 1, Scalar(0, 0, 255));
+			outText.push_back(pair<string, RotatedRect>(str1, rect1));
+		}
+		if (!str2.empty())
+		{
+			putText(outTextMat, str2, rect2.center, FONT_HERSHEY_COMPLEX, 1, Scalar(0, 0, 255));
+			outText.push_back(pair<string, RotatedRect>(str2, rect2));
+		}
 		//waitKey(0);
 	}
+//#ifdef SHOW_DEBUG
 	string newPath = path + "TextMat.jpg";
 	imwrite(newPath, outTextMat);
-
+//#endif 
 }
 
 /**********************************************************************
@@ -566,7 +701,7 @@ bool detectText(Mat &src, vector<pair<string, RotatedRect>> &outText, std::strin
 	// Initialize tesseract to use English (eng) and the LSTM OCR engine. 
 	ocr->Init(g_traning_data_path.c_str(), "ngi+eng", tesseract::OEM_DEFAULT);
 	// Set Page segmentation mode to PSM_AUTO (3)
-	ocr->SetPageSegMode(tesseract::PSM_SINGLE_LINE);
+	ocr->SetPageSegMode(tesseract::PSM_AUTO);
 	//ocr->SetVariable("tessedit_char_whitelist", "φ0123456789abcdefjhijklmnopqrstuvwxyzABCDEFJHIJKLMNOPQRSTUVWXYZ.,+-");
 	//string outTextStr;
 	//ocr->SetImage(src.data, src.cols, src.rows, 3, src.step);
