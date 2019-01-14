@@ -123,8 +123,8 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>..\x64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libtesseract.lib;zlib.lib;openjpeg.lib;libwebp.lib;libtiff.lib;libpng.lib;liblept.lib;libjpeg.lib;giflib.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>../../lib;..\..\vendor\giflib\lib;..\..\vendor\jbig2enc\lib;..\..\vendor\libjpeg\lib;..\..\vendor\liblept\lib;..\..\vendor\libpng\lib;..\..\vendor\libtiff\lib;..\..\vendor\zlib\lib;..\..\vendor\opencv\lib;..\..\vendor\openjpeg\lib;..\..\vendor\libwebp\lib;..\x64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libtesseract.lib;zlib.lib;openjpeg.lib;libwebp.lib;libtiff.lib;libpng.lib;liblept.lib;libjpeg.lib;giflib.lib;opencv_world341.lib;ImgCatch.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
