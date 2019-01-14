@@ -529,7 +529,8 @@ void detectArrows(const Mat &src, vector<vector<Point2f>> &vtArrows, const doubl
 				triangle[1].x * (triangle[2].y - triangle[0].y) +
 				triangle[2].x * (triangle[0].y - triangle[1].y)) /
 				2;
-			if (triangle_area > 0.0)
+			// Add min standard area 
+			if (triangle_area > 50.0)
 			{
 				// Get ratio between boundary triangle area and region area
 				auto ratio = cnt_area / triangle_area;
