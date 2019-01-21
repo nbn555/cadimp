@@ -18,10 +18,10 @@ using namespace std;
 
 int main(int argc, char** argv) {
 	Mat src, src_gray;
-	detectTextOfFolder("Test3.3");
+	//detectTextOfFolder("Test3.3");
 	/// Read the image
 	//src = imread("G:/Nghi/ImgCatch/300 Dpi/2/20181219031311074_0005.jpg", 1);
-	/*src = imread("ngi5.jpg");
+	src = imread("Test3/20181219032045916_0006.jpg");
 	if (!src.data)
 	{
 		return -1;
@@ -29,7 +29,7 @@ int main(int argc, char** argv) {
 	vector<Point> intersectionPoints;
 	vector<Vec3f> outCircles;
 	Mat removedBorderMat;
-	removeBorder(src, removedBorderMat);*/
+	removeBorder(src, removedBorderMat);
 	/*intersectionPoints.push_back(Point(2044, 1491));
 	intersectionPoints.push_back(Point(2042, 1491));
 	intersectionPoints.push_back(Point(2043, 682 ));
@@ -76,10 +76,9 @@ int main(int argc, char** argv) {
 	intersectionPoints.push_back(Point(1696, 1255));
 	intersectionPoints.push_back(Point(1162, 637 ));
 	intersectionPoints.push_back(Point(1199, 1199));
-*/
-	//getIntersections(removedBorderMat, intersectionPoints, 1);
+	getIntersections(removedBorderMat, intersectionPoints, 1);*/
 	//detectCircle(removedBorderMat,outCircles, intersectionPoints, "");
-	//detectCircle1(src, intersectionPoints, outCircles);
+	detectCircle1(removedBorderMat, intersectionPoints, outCircles);
  //   char result[MAX_PATH];
  //   GetCurrentDir(result, sizeof(result));
  // //  std::string trainpath = std::string(result);

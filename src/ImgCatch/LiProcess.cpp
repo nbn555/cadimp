@@ -98,16 +98,18 @@ void detectCircle1(Mat &src, vector<Point> intersectionPoints, vector<Vec3f> &ou
 	{
 		return;
 	}
-#ifdef DEBUG_FLAG
+#ifdef DEBUG_FLAG_
 	Mat intersectionPointMat = src.clone();
 	for (size_t i = 0; i < intersectionPoints.size(); i++)
 	{
 		circle(intersectionPointMat, intersectionPoints[i], 4, Scalar(0, 0, 255), 2);
 	}
+	namedWindow("intersectionPointMat", CV_WINDOW_NORMAL);
+	setWindowProperty("intersectionPointMat", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
 	imshow("intersectionPointMat", intersectionPointMat);
 	waitKey(0);
 #endif
-	int param2 = src.cols > 1000 ? 100 : (src.cols > 200 ? 50 : 30);
+	int param2 = 29;// src.cols > 1000 ? 100 : (src.cols > 200 ? 50 : 30);
 
 	Mat src_gray;
 	cvtColor(src, src_gray, CV_BGR2GRAY);
@@ -121,10 +123,10 @@ void detectCircle1(Mat &src, vector<Point> intersectionPoints, vector<Vec3f> &ou
 		std::vector<Point> newIntersectionPoints = intersectionPoints;
 		if (useInterPoint)
 		{
-			HoughCircles(src_gray, circles, newIntersectionPoints, HOUGH_GRADIENT, 1, src_gray.rows / 8, 200, param2, 0, 0);
+			HoughCircles(src_gray, circles, newIntersectionPoints, HOUGH_GRADIENT, 1, src_gray.rows / 8, 200, param2, 50, 150);
 		}
 		else {
-			HoughCircles(src_gray, circles, HOUGH_GRADIENT, 1, src_gray.rows / 8, 200, param2, 0, 0);
+			HoughCircles(src_gray, circles, HOUGH_GRADIENT, 1, src_gray.rows / 8, 200, param2, 45, 135);
 		}
 
 		/// Draw the circles detected
@@ -137,24 +139,24 @@ void detectCircle1(Mat &src, vector<Point> intersectionPoints, vector<Vec3f> &ou
 		}
 		iterator++;
 	} while (!circles.empty() && iterator < 10);
-	//for (size_t i = 0; i < outCircles.size(); i++)
-	//{
-	//	/*outCircles[i][0] = outCircles[i][0] / scale;
-	//	outCircles[i][1] = outCircles[i][1] / scale;
-	//	outCircles[i][2] = outCircles[i][2] / scale;*/
-	//	Point center(cvRound(outCircles[i][0]), cvRound(outCircles[i][1]));
-	//	int radius = cvRound(outCircles[i][2]);
-	//	// circle center
-	//	circle(src, center, 3, Scalar(0, 255, 0), -1, 8, 0);
-	//	// circle outline
-	//	circle(src, center, radius, Scalar(0, 0, 255), 9, 8, 0);
-	//}
+	for (size_t i = 0; i < outCircles.size(); i++)
+	{
+		/*outCircles[i][0] = outCircles[i][0] / scale;
+		outCircles[i][1] = outCircles[i][1] / scale;
+		outCircles[i][2] = outCircles[i][2] / scale;*/
+		Point center(cvRound(outCircles[i][0]), cvRound(outCircles[i][1]));
+		int radius = cvRound(outCircles[i][2]);
+		// circle center
+		circle(src, center, 3, Scalar(0, 255, 0), -1, 8, 0);
+		// circle outline
+		circle(src, center, radius, Scalar(0, 0, 255), 1, 8, 0);
+	}
 	//imshow("src", src);
 	//waitKey(0);
 	/*namedWindow("circles", CV_WINDOW_NORMAL);
 	setWindowProperty("circles", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);*/
-	//path += "circle.jpg";
-	//imwrite(path, src);
+	string path = "circle.jpg";
+	imwrite(path, src);
 }
 
 void detectCircle2(Mat &src, vector<Vec3f> &outCircles, vector<Point> intersectionPoints, string path) {
