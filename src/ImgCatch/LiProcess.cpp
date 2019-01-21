@@ -79,7 +79,7 @@ void detectCircleOfFolder(const string &path){
 				removeBorder(src, removedBorderMat);
 				vector<Vec3f> outCircles;
 				vector<Point> intersectionPoints;
-				detectCircle(removedBorderMat, outCircles,intersectionPoints , newPath);
+				//detectCircle(removedBorderMat, outCircles,intersectionPoints , newPath);
 				//(Mat &src, vector<Vec3f> &outCircles, vector<Point> intersectionPoints, string path) {
 			}
 		}
@@ -88,7 +88,58 @@ void detectCircleOfFolder(const string &path){
 	}
 }
 
-void detectCircle1(Mat &src, vector<Point> intersectionPoints, vector<Vec3f> &outCircles) {
+void detectCircleWithMinMaxRadius(Mat &src_gray, vector<Point> &intersectionPoints, int radius, vector<Vec3f> &outCircles) {
+	/*namedWindow("intersectionPointMat", CV_WINDOW_NORMAL);
+	setWindowProperty("intersectionPointMat", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
+	imshow("intersectionPointMat", src_gray);
+	waitKey();*/
+	vector<Vec3f> circles;
+	int iterator = 0;
+	int param, minRadius, maxRadius;
+	
+	if (radius == 0)
+	{
+		param = src_gray.cols > 1000 ? 100 : (src_gray.cols > 200 ? 50 : 30);
+		minRadius = 0;
+		maxRadius = 0;
+	}
+	else {
+		const int radius1 = 8;
+		const int radius2 = 45;
+		const int param1 = 15;
+		const int param2 = 30;
+		const int radiusRange = 10;
+		minRadius = max(radius - radiusRange, radius / 2);
+		maxRadius = min(radius + radiusRange, radius * 3 / 2);
+		param = (radius - radius1)*(param2 - param1) / (radius2 - radius1) + param1;// 
+		param = max(param, 10);
+	}
+	do
+	{
+		circles.clear();
+		std::vector<Point> newIntersectionPoints = intersectionPoints;
+		if (!intersectionPoints.empty())
+		{
+			HoughCircles(src_gray, circles, newIntersectionPoints, HOUGH_GRADIENT, 1, src_gray.rows / 8, 200, param, minRadius, maxRadius);
+		}
+		else {
+			HoughCircles(src_gray, circles, HOUGH_GRADIENT, 1, src_gray.rows / 8, 200, param, minRadius, maxRadius);
+		}
+
+		/// Draw the circles detected
+		for (size_t i = 0; i < circles.size(); i++)
+		{
+			outCircles.push_back(circles[i]);
+			Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
+			int radius = cvRound(circles[i][2]);
+			circle(src_gray, center, radius, Scalar::all(255), 15, 8, 0);
+		}
+		iterator++;
+	} while (!circles.empty() && iterator < 10);
+
+}
+
+void detectCircle(Mat &src, vector<Point> &intersectionPoints, vector<std::pair<int, int>> &circleInfors, vector<Vec3f> &outCircles) {
 	if (!src.data)
 	{
 		return;
@@ -98,7 +149,7 @@ void detectCircle1(Mat &src, vector<Point> intersectionPoints, vector<Vec3f> &ou
 	{
 		return;
 	}
-#ifdef DEBUG_FLAG_
+#ifdef DEBUG_FLAG
 	Mat intersectionPointMat = src.clone();
 	for (size_t i = 0; i < intersectionPoints.size(); i++)
 	{
@@ -109,41 +160,31 @@ void detectCircle1(Mat &src, vector<Point> intersectionPoints, vector<Vec3f> &ou
 	imshow("intersectionPointMat", intersectionPointMat);
 	waitKey(0);
 #endif
-	int param2 = 29;// src.cols > 1000 ? 100 : (src.cols > 200 ? 50 : 30);
 
 	Mat src_gray;
 	cvtColor(src, src_gray, CV_BGR2GRAY);
 	outCircles.clear();
-	vector<Vec3f> circles;
-	int iterator = 0;
-	bool useInterPoint = intersectionPoints.empty() ? false : true;
-	do
+	if (circleInfors.empty())
 	{
-		circles.clear();
-		std::vector<Point> newIntersectionPoints = intersectionPoints;
-		if (useInterPoint)
+		detectCircleWithMinMaxRadius(src_gray.clone(), intersectionPoints, 0, outCircles);
+	}
+	else {
+		int minRadius, maxRadius;
+		vector<Vec3f> circles;
+		for (size_t circleInforId = 0; circleInforId < circleInfors.size(); circleInforId++)
 		{
-			HoughCircles(src_gray, circles, newIntersectionPoints, HOUGH_GRADIENT, 1, src_gray.rows / 8, 200, param2, 50, 150);
+			circles.clear();
+			
+			detectCircleWithMinMaxRadius(src_gray.clone(), intersectionPoints, circleInfors[circleInforId].first, outCircles);
+			for (size_t circleId = 0; circleId < circles.size(); circleId++)
+			{
+				outCircles.push_back(circles[circleId]);
+			}
 		}
-		else {
-			HoughCircles(src_gray, circles, HOUGH_GRADIENT, 1, src_gray.rows / 8, 200, param2, 45, 135);
-		}
-
-		/// Draw the circles detected
-		for (size_t i = 0; i < circles.size(); i++)
-		{
-			outCircles.push_back(circles[i]);
-			Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
-			int radius = cvRound(circles[i][2]);
-			circle(src_gray, center, radius, Scalar::all(0), 15, 8, 0);
-		}
-		iterator++;
-	} while (!circles.empty() && iterator < 10);
+		
+	}
 	for (size_t i = 0; i < outCircles.size(); i++)
 	{
-		/*outCircles[i][0] = outCircles[i][0] / scale;
-		outCircles[i][1] = outCircles[i][1] / scale;
-		outCircles[i][2] = outCircles[i][2] / scale;*/
 		Point center(cvRound(outCircles[i][0]), cvRound(outCircles[i][1]));
 		int radius = cvRound(outCircles[i][2]);
 		// circle center
@@ -259,164 +300,164 @@ void addToCircles(vector<Vec3f> &outCircles, Vec3f circle) {
 	}
 	outCircles.push_back(circle);
 }
-
-void detectCircle(Mat &src, vector<Vec3f> &outCircles,vector<Point> intersectionPoints, string path) {
-	if (!src.data)
-	{
-		return;
-	}
-	outCircles.clear();
-	Mat resizedMat;
-	double scale = 1720.0 / src.size().width;
-	//resizedMat = src.clone();
-	resize(src, resizedMat, cv::Size(), scale, scale, cv::INTER_AREA);
-	//getIntersections(resizedMat, intersectionPoints, 1);
-	for (size_t intersectionPointId = 0; intersectionPointId < intersectionPoints.size(); intersectionPointId++)
-	{
-		intersectionPoints[intersectionPointId].x *= scale;
-		intersectionPoints[intersectionPointId].y *= scale;
-	}
-#ifdef DEBUG_FLAG
-	Mat intersectionPointMat = resizedMat.clone();
-	for (size_t i = 0; i < intersectionPoints.size(); i++)
-	{
-		circle(intersectionPointMat, intersectionPoints[i], 4, Scalar(0, 0, 255), 2);
-	}
-	//namedWindow("intersectionPointMat", CV_WINDOW_NORMAL);
-	//setWindowProperty("intersectionPointMat", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
-	//imshow("intersectionPointMat", intersectionPointMat);
-	//waitKey();
-#endif
-	//namedWindow("Original image", CV_WINDOW_AUTOSIZE);
-	//imshow("Original image", src);
-	Mat grayMat, cannyMat;
-	cvtColor(resizedMat, grayMat, CV_BGR2GRAY);
-	Canny(grayMat, cannyMat, 50, 150, 3);
-	/*Mat dilateMat;
-	Mat element = getStructuringElement(MORPH_RECT,Size(3, 3),Point(2,2));
-	dilate(cannyMat, dilateMat, element);*/
-	vector<vector<Point>> contours;
-	findContours(cannyMat.clone(), contours, RETR_LIST, CHAIN_APPROX_NONE);
-	Mat contourMat = Mat(cannyMat.size(), CV_8UC1, Scalar::all(0));
-	drawContours(contourMat, contours, -1, Scalar::all(255));
-	Mat blurMat;
-	GaussianBlur(cannyMat, blurMat, Size(9, 9), 2, 2);
-	//imshow("blurMat", blurMat);
-	//imshow("contourMat", contourMat);
-	//waitKey(0);
-	Rect rect;
-	Mat croppedMat;
-	for (size_t contourId = 0; contourId < contours.size(); contourId++)
-	{
-		//drawContours(contourMat, contours, i, Scalar::all(255));
-
-		rect = minAreaRect(contours[contourId]).boundingRect();
-		rect.width += 40;
-		rect.height += 40;
-		rect.x -= 20;
-		rect.y -= 20;
-		if (rect.x <0)
-		{
-			rect.x = 0;
-		}
-		if (rect.x + rect.width > blurMat.cols - 1)
-		{
-			rect.width = blurMat.cols - rect.x - 1;
-		}
-
-		if (rect.y <0)
-		{
-			rect.y = 0;
-		}
-		if (rect.y + rect.height > blurMat.rows - 1)
-		{
-			rect.height = blurMat.rows - rect.y - 1;
-		}
-		if (rect.width < 50 || rect.height < 50)
-		{
-			continue;
-		}
-		/*imshow("contourMat", contourMat);
-		waitKey(0);*/
-		croppedMat = blurMat(rect).clone();
-		/// Reduce the noise so we avoid false circle detection
-		cvtColor(croppedMat, croppedMat, CV_GRAY2BGR);
-		std:vector<Point> newIntersectionPoints(intersectionPoints.size());
-		for (size_t intersectionPointId = 0; intersectionPointId < intersectionPoints.size(); intersectionPointId++)
-		{
-			newIntersectionPoints[intersectionPointId].x = intersectionPoints[intersectionPointId].x - rect.x;
-			newIntersectionPoints[intersectionPointId].y = intersectionPoints[intersectionPointId].y - rect.y;
-		}
-#ifdef DEBUG_FLAG
-		/*string croppedName = std::to_string(contourId) + ".jpg";
-		imwrite(croppedName, croppedMat);*/
-#endif // DEBUG_FLAG
-		vector<Vec3f> circles;
-		detectCircle1(croppedMat, newIntersectionPoints, circles);
-		int iterator = 0;
-		for (size_t i = 0; i < circles.size(); i++)
-		{
-			if (circles[i][2] <= 5)
-			{
-				continue;
-			}
-			Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
-			int radius = cvRound(circles[i][2]);
-			//// circle center
-			//circle(croppedMat, center, 3, Scalar(0, 255, 0), -1, 8, 0);
-			//// circle outline
-			//circle(croppedMat, center, radius, Scalar(0, 0, 255), 9, 8, 0);
-			Mat croppedCannyMat = cannyMat(rect).clone();
-			Mat circleMat(croppedCannyMat.size(), CV_8UC1, Scalar::all(0));
-			circle(circleMat, center, radius, Scalar::all(255));
-			int circleLength = countNonZero(circleMat);
-			Mat dilateMat;
-			Mat element = getStructuringElement(MORPH_RECT, Size(3, 3), Point(2, 2));
-			dilate(croppedCannyMat, dilateMat, element);
-			erode(dilateMat, dilateMat, element);
-			//imshow("circleMat", circleMat);
-			bitwise_and(circleMat, dilateMat, circleMat);
-			/*imshow("dilateMat", dilateMat);
-			imshow("bitwise_and", circleMat);
-			waitKey(0);*/
-			int innerCircleLength = countNonZero(circleMat);
-			float innerCircleRatio = (float)innerCircleLength / circleLength;
-			if (innerCircleRatio < 0.3)
-			{
-				continue;
-			}
-			circles[i][0] = (rect.x + circles[i][0]) / scale;
-			circles[i][1] = (rect.y + circles[i][1]) / scale;
-			circles[i][2] = circles[i][2] / scale;
-			addToCircles(outCircles, circles[i]);
-			//outCircles.push_back(circles[i]);
-		}
-
-		/// Show your results
-		/*namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
-		imshow("Hough Circle Transform Demo", src);
-		waitKey(0);*/
-		/*namedWindow("circles", CV_WINDOW_NORMAL);
-		setWindowProperty("circles", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);*/
-		/*imshow("circles", croppedMat);
-		string circleName = std::to_string(i) + "circle.jpg";
-		imwrite(circleName, croppedMat);*/
-		//waitKey(0);
-	}
-	for (size_t i = 0; i < outCircles.size(); i++)
-	{
-		Point center = Point(cvRound(outCircles[i][0]), cvRound(outCircles[i][1]));
-		int radius = cvRound(outCircles[i][2]);
-		// circle center
-		circle(src, center, 3, Scalar(0, 255, 0), -1, 8, 0);
-		// circle outline
-		circle(src, center, radius, Scalar(0, 0, 255), 1, 8, 0);
-	}
-#ifdef DEBUG_FLAG_
-	path += "circles.jpg";
-	imwrite(path, src);
-#endif // DEBUG_FLAG
-}
+//
+//void detectCircle(Mat &src, vector<Vec3f> &outCircles,vector<Point> intersectionPoints, string path) {
+//	if (!src.data)
+//	{
+//		return;
+//	}
+//	outCircles.clear();
+//	Mat resizedMat;
+//	double scale = 1720.0 / src.size().width;
+//	//resizedMat = src.clone();
+//	resize(src, resizedMat, cv::Size(), scale, scale, cv::INTER_AREA);
+//	//getIntersections(resizedMat, intersectionPoints, 1);
+//	for (size_t intersectionPointId = 0; intersectionPointId < intersectionPoints.size(); intersectionPointId++)
+//	{
+//		intersectionPoints[intersectionPointId].x *= scale;
+//		intersectionPoints[intersectionPointId].y *= scale;
+//	}
+//#ifdef DEBUG_FLAG
+//	Mat intersectionPointMat = resizedMat.clone();
+//	for (size_t i = 0; i < intersectionPoints.size(); i++)
+//	{
+//		circle(intersectionPointMat, intersectionPoints[i], 4, Scalar(0, 0, 255), 2);
+//	}
+//	//namedWindow("intersectionPointMat", CV_WINDOW_NORMAL);
+//	//setWindowProperty("intersectionPointMat", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
+//	//imshow("intersectionPointMat", intersectionPointMat);
+//	//waitKey();
+//#endif
+//	//namedWindow("Original image", CV_WINDOW_AUTOSIZE);
+//	//imshow("Original image", src);
+//	Mat grayMat, cannyMat;
+//	cvtColor(resizedMat, grayMat, CV_BGR2GRAY);
+//	Canny(grayMat, cannyMat, 50, 150, 3);
+//	/*Mat dilateMat;
+//	Mat element = getStructuringElement(MORPH_RECT,Size(3, 3),Point(2,2));
+//	dilate(cannyMat, dilateMat, element);*/
+//	vector<vector<Point>> contours;
+//	findContours(cannyMat.clone(), contours, RETR_LIST, CHAIN_APPROX_NONE);
+//	Mat contourMat = Mat(cannyMat.size(), CV_8UC1, Scalar::all(0));
+//	drawContours(contourMat, contours, -1, Scalar::all(255));
+//	Mat blurMat;
+//	GaussianBlur(cannyMat, blurMat, Size(9, 9), 2, 2);
+//	//imshow("blurMat", blurMat);
+//	//imshow("contourMat", contourMat);
+//	//waitKey(0);
+//	Rect rect;
+//	Mat croppedMat;
+//	for (size_t contourId = 0; contourId < contours.size(); contourId++)
+//	{
+//		//drawContours(contourMat, contours, i, Scalar::all(255));
+//
+//		rect = minAreaRect(contours[contourId]).boundingRect();
+//		rect.width += 40;
+//		rect.height += 40;
+//		rect.x -= 20;
+//		rect.y -= 20;
+//		if (rect.x <0)
+//		{
+//			rect.x = 0;
+//		}
+//		if (rect.x + rect.width > blurMat.cols - 1)
+//		{
+//			rect.width = blurMat.cols - rect.x - 1;
+//		}
+//
+//		if (rect.y <0)
+//		{
+//			rect.y = 0;
+//		}
+//		if (rect.y + rect.height > blurMat.rows - 1)
+//		{
+//			rect.height = blurMat.rows - rect.y - 1;
+//		}
+//		if (rect.width < 50 || rect.height < 50)
+//		{
+//			continue;
+//		}
+//		/*imshow("contourMat", contourMat);
+//		waitKey(0);*/
+//		croppedMat = blurMat(rect).clone();
+//		/// Reduce the noise so we avoid false circle detection
+//		cvtColor(croppedMat, croppedMat, CV_GRAY2BGR);
+//		std:vector<Point> newIntersectionPoints(intersectionPoints.size());
+//		for (size_t intersectionPointId = 0; intersectionPointId < intersectionPoints.size(); intersectionPointId++)
+//		{
+//			newIntersectionPoints[intersectionPointId].x = intersectionPoints[intersectionPointId].x - rect.x;
+//			newIntersectionPoints[intersectionPointId].y = intersectionPoints[intersectionPointId].y - rect.y;
+//		}
+//#ifdef DEBUG_FLAG
+//		/*string croppedName = std::to_string(contourId) + ".jpg";
+//		imwrite(croppedName, croppedMat);*/
+//#endif // DEBUG_FLAG
+//		vector<Vec3f> circles;
+//		detectCircle1(croppedMat, newIntersectionPoints, circles);
+//		int iterator = 0;
+//		for (size_t i = 0; i < circles.size(); i++)
+//		{
+//			if (circles[i][2] <= 5)
+//			{
+//				continue;
+//			}
+//			Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
+//			int radius = cvRound(circles[i][2]);
+//			//// circle center
+//			//circle(croppedMat, center, 3, Scalar(0, 255, 0), -1, 8, 0);
+//			//// circle outline
+//			//circle(croppedMat, center, radius, Scalar(0, 0, 255), 9, 8, 0);
+//			Mat croppedCannyMat = cannyMat(rect).clone();
+//			Mat circleMat(croppedCannyMat.size(), CV_8UC1, Scalar::all(0));
+//			circle(circleMat, center, radius, Scalar::all(255));
+//			int circleLength = countNonZero(circleMat);
+//			Mat dilateMat;
+//			Mat element = getStructuringElement(MORPH_RECT, Size(3, 3), Point(2, 2));
+//			dilate(croppedCannyMat, dilateMat, element);
+//			erode(dilateMat, dilateMat, element);
+//			//imshow("circleMat", circleMat);
+//			bitwise_and(circleMat, dilateMat, circleMat);
+//			/*imshow("dilateMat", dilateMat);
+//			imshow("bitwise_and", circleMat);
+//			waitKey(0);*/
+//			int innerCircleLength = countNonZero(circleMat);
+//			float innerCircleRatio = (float)innerCircleLength / circleLength;
+//			if (innerCircleRatio < 0.3)
+//			{
+//				continue;
+//			}
+//			circles[i][0] = (rect.x + circles[i][0]) / scale;
+//			circles[i][1] = (rect.y + circles[i][1]) / scale;
+//			circles[i][2] = circles[i][2] / scale;
+//			addToCircles(outCircles, circles[i]);
+//			//outCircles.push_back(circles[i]);
+//		}
+//
+//		/// Show your results
+//		/*namedWindow("Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE);
+//		imshow("Hough Circle Transform Demo", src);
+//		waitKey(0);*/
+//		/*namedWindow("circles", CV_WINDOW_NORMAL);
+//		setWindowProperty("circles", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);*/
+//		/*imshow("circles", croppedMat);
+//		string circleName = std::to_string(i) + "circle.jpg";
+//		imwrite(circleName, croppedMat);*/
+//		//waitKey(0);
+//	}
+//	for (size_t i = 0; i < outCircles.size(); i++)
+//	{
+//		Point center = Point(cvRound(outCircles[i][0]), cvRound(outCircles[i][1]));
+//		int radius = cvRound(outCircles[i][2]);
+//		// circle center
+//		circle(src, center, 3, Scalar(0, 255, 0), -1, 8, 0);
+//		// circle outline
+//		circle(src, center, radius, Scalar(0, 0, 255), 1, 8, 0);
+//	}
+//#ifdef DEBUG_FLAG_
+//	path += "circles.jpg";
+//	imwrite(path, src);
+//#endif // DEBUG_FLAG
+//}
 // khoi tao ma tran 2 chieu kich thuoc size
 void CreateIntMatrix(int **&matrix, CvSize size) {
 	matrix = new int*[size.height];

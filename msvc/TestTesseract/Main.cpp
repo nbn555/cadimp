@@ -21,7 +21,7 @@ int main(int argc, char** argv) {
 	//detectTextOfFolder("Test3.3");
 	/// Read the image
 	//src = imread("G:/Nghi/ImgCatch/300 Dpi/2/20181219031311074_0005.jpg", 1);
-	src = imread("Test3/20181219032045916_0006.jpg");
+	src = imread("Test3/t (4).jpg");
 	if (!src.data)
 	{
 		return -1;
@@ -78,7 +78,10 @@ int main(int argc, char** argv) {
 	intersectionPoints.push_back(Point(1199, 1199));
 	getIntersections(removedBorderMat, intersectionPoints, 1);*/
 	//detectCircle(removedBorderMat,outCircles, intersectionPoints, "");
-	detectCircle1(removedBorderMat, intersectionPoints, outCircles);
+	std::vector<std::pair<int, int>> circleInfors;
+	circleInfors.push_back(std::pair<int, int>(50, 1));
+	//circleInfors.push_back(std::pair<int, int>(8, 1));
+	detectCircle(removedBorderMat, intersectionPoints, circleInfors, outCircles);
  //   char result[MAX_PATH];
  //   GetCurrentDir(result, sizeof(result));
  // //  std::string trainpath = std::string(result);
