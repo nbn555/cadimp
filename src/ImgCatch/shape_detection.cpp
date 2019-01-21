@@ -433,7 +433,8 @@ void detectLines(Mat src, vector<Vec4i> &lines)
 		cv::findContours(dst_image, vtContours, vtHierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
 		for (auto &&cnt : vtContours)
 		{
-			if (cv::arcLength(cnt, false) >= 5)
+			// Uncomment if need performance ???
+			//if (cv::arcLength(cnt, false) >= 5) 
 			{
 				auto rect = cv::minAreaRect(cv::Mat(cnt));
 				auto index = 0;
@@ -456,7 +457,7 @@ void detectLines(Mat src, vector<Vec4i> &lines)
 					}
 					vtRectCnt->at(4) = (cv::Point((int)rect_points[0].x, (int)rect_points[0].y));
 
-					cv::drawContours(temp_image, vtCnt, 0, cv::Scalar(255), -1);
+					//cv::drawContours(temp_image, vtCnt, 0, cv::Scalar(255), -1);
 					check = true;
 					auto p1 = getMidPoint(rect_points[index], rect_points[index + 1]);
 					auto p2 = getMidPoint(rect_points[index + 2], rect_points[(index + 3) % 4]);
@@ -467,11 +468,11 @@ void detectLines(Mat src, vector<Vec4i> &lines)
 			}
 		}
 
-		if (check)
+		/*if (check)
 		{
 			cv::bitwise_and(dst_image, temp_image, temp_image);
 			dst_image = dst_image - temp_image;
-		}
+		}*/
 
 		// Step 2:
 		std::vector<cv::Vec4i> vtlines;
@@ -479,7 +480,7 @@ void detectLines(Mat src, vector<Vec4i> &lines)
 
 		//		cv::ximgproc::thinning(gray_image, temp_image);
 		//thinning(gray_image, temp_image);
-		cv::HoughLinesP(dst_image, vtlines, 1, CV_PI / 180, 5, 5, 5);
+		cv::HoughLinesP(dst_image, vtlines, 1, CV_PI / 90, 5, 3, 3);
 		if (vtlines.size() > 0)
 		{
 			lines.insert(lines.end(), vtlines.begin(), vtlines.end());
@@ -529,7 +530,8 @@ void detectArrows(const Mat &src, vector<vector<Point2f>> &vtArrows, const doubl
 				triangle[1].x * (triangle[2].y - triangle[0].y) +
 				triangle[2].x * (triangle[0].y - triangle[1].y)) /
 				2;
-			if (triangle_area > 0.0)
+			// Add min standard area 
+			if (triangle_area > 50.0)
 			{
 				// Get ratio between boundary triangle area and region area
 				auto ratio = cnt_area / triangle_area;
