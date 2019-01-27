@@ -41,7 +41,7 @@
 #include "LiProcess.h"
 #include <algorithm>
 
-//#define SHOW_DEBUG
+#define SHOW_DEBUG
 
 using namespace std;
 using namespace cv;
@@ -91,53 +91,9 @@ void detectTextOfFolder(const std::string &path) {
 	}
 }
 
-bool cropByContour(Mat &src, vector<Point2i> &contour, Mat &cropped, RotatedRect &rect, float angle) {
-	// rect is the RotatedRect (I got it from a contour...)
-	rect = minAreaRect(contour);
-	// matrices we'll use
-	Mat M, rotated;
-	// get angle and size from the bounding box
-	cout << rect.angle << endl;
-	if ((contour.size() > 4 && rect.size.width < rect.size.height)
-		|| (contour.size() == 4 && rect.size.width > rect.size.height)) {
-		if (rect.angle == 0) {
-			rect.angle = -90;
-		}
-		else {
-			rect.angle += 90.0;
-		}
-		if (abs(rect.angle - angle) <= 45)
-		{
-			swap(rect.size.width, rect.size.height);
-		}
-	}
-	if (abs(rect.angle - angle) > 45)
-	{
-		rect.angle = angle;
-	}
-	Size2f rect_size = rect.size;
-	//cout << angle << endl;
-	rect_size.width += 2;
-	rect_size.height += 2;
-	// get the rotation matrix
-	M = getRotationMatrix2D(rect.center, rect.angle, 1.0);
-	// perform the affine transformation
-	warpAffine(src, rotated, M, src.size(), INTER_CUBIC);//INTER_LANCSOZ4
-	// crop the resulting image
-	getRectSubPix(rotated, rect_size, rect.center, cropped);
-	Mat extendMat(cropped.rows * 2.5, cropped.cols * 2.5, CV_8UC3, Scalar::all(255));
-	if (cropped.rows == 0 || cropped.cols == 0)
-	{
-		return false;
-	}
-	cropped.copyTo(extendMat(Rect(cropped.cols / 2, cropped.rows / 2, cropped.cols, cropped.rows)));
-	cropped = extendMat.clone();
-	return true;
-}
-
-void drawRotatedRectangle(cv::Mat& image, RotatedRect &rotatedRectangle, Scalar color = Scalar(0,0,255))
+void drawRotatedRectangle(cv::Mat& image, RotatedRect &rotatedRectangle, Scalar color = Scalar(0, 0, 255))
 {
-											  // We take the edges that OpenCV calculated for us
+	// We take the edges that OpenCV calculated for us
 	cv::Point2f vertices2f[4];
 	rotatedRectangle.points(vertices2f);
 
@@ -152,6 +108,129 @@ void drawRotatedRectangle(cv::Mat& image, RotatedRect &rotatedRectangle, Scalar 
 		vertices,
 		4,
 		color);
+}
+
+bool correctRect(Rect &rect, Size size) {
+	if (rect.x >= size.width - 5 || rect.y >= size.height - 5)
+	{
+		return false;
+	}
+	if (rect.x + rect.width > size.width - 1)
+	{
+		rect.width = size.width - rect.x - 1;
+	}
+	if (rect.y + rect.height > size.height - 1)
+	{
+		rect.height = size.height - rect.y - 1;
+	}
+}
+
+bool cropByContour(Mat &src, vector<RotatedRect>& aRectGroup, Mat &cropped, RotatedRect& boundingRect) {
+	vector<Point> wordContour;
+	vector<Point> centerPoints;
+	for (size_t j = 0; j < aRectGroup.size(); j++)
+	{
+		cv::Point2f vertices2f[4];
+		aRectGroup[j].points(vertices2f);
+		for (int i = 0; i < 4; ++i) {
+			wordContour.push_back((Point)vertices2f[i]);
+		}
+
+		centerPoints.push_back(aRectGroup[j].center);
+	}
+
+	boundingRect = minAreaRect(wordContour);
+	/*Mat groupedRectMat = src.clone();
+	drawRotatedRectangle(groupedRectMat, boundingRect);
+	namedWindow("rectangle", CV_WINDOW_NORMAL);
+	setWindowProperty("rectangle", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
+	imshow("rectangle", groupedRectMat);
+	waitKey(0);*/
+	float angle;
+	if (aRectGroup.size() == 1) {
+		angle = boundingRect.angle;
+		if (boundingRect.size.width > boundingRect.size.height)
+		{
+			angle = boundingRect.angle > -2.0 && boundingRect.angle <= 0.0 ? -90.0 : angle + 90.0;
+			swap(boundingRect.size.width, boundingRect.size.height);
+		}
+	}
+	else {
+		if (aRectGroup.size() == 2)
+		{
+			Point pointDiff = centerPoints[1] - centerPoints[0];
+			angle = cvFastArctan(pointDiff.y, pointDiff.x);
+			if (angle > 90 & angle <= 180)
+			{
+				angle -= 180;
+			}
+			else if (angle > 180 && angle <= 270)
+			{
+				angle -= 180;
+			}
+			else if (angle > 270 && angle <= 360)
+			{
+				angle -= 360;
+			}
+			float angleDistance = abs(boundingRect.angle - angle);
+			if (angleDistance < 45 || angleDistance > 135) {
+				angle = boundingRect.angle;
+			}
+			else
+			{
+				angle = boundingRect.angle > -2.0 && boundingRect.angle <= 0.0 ? -90.0 : boundingRect.angle + 90.0;
+				swap(boundingRect.size.width, boundingRect.size.height);
+			}
+		}
+		else
+		{
+			RotatedRect centerRect = minAreaRect(centerPoints);
+			angle = centerRect.angle;
+			if (centerRect.size.width < centerRect.size.height)
+			{
+				angle = angle > -2.0 && angle <= 0.0 ? -90.0 : angle + 90.0;
+			}
+			float angleDistance = abs(boundingRect.angle - angle);
+			if (angleDistance > 45 && angleDistance < 135)
+			{
+				swap(boundingRect.size.width, boundingRect.size.height);
+			}
+		}
+	}
+	boundingRect.angle = angle;
+	
+	Size2f rect_size = boundingRect.size;
+	//cout << angle << endl;
+	rect_size.width += 2;
+	rect_size.height += 2;
+	// get the rotation matrix
+	Mat M, rotated;
+	int maxRectSize = max(rect_size.width, rect_size.height) * 2.5;
+	cv::Rect rect(boundingRect.center - Point2f(maxRectSize / 2, maxRectSize / 2), Size2i(maxRectSize, maxRectSize));
+	correctRect(rect, src.size());
+	cropped = src(rect);
+	M = getRotationMatrix2D(Point2f(cropped.cols/2, cropped.rows/2), boundingRect.angle, 1.0);
+	// perform the affine transformation
+	imshow("cropped", cropped);
+	warpAffine(cropped, rotated, M, cropped.size(), INTER_CUBIC);//INTER_LANCSOZ4
+	imshow("rotated", rotated);
+	// crop the resulting image
+	//Point2f croppedRectCenter = boundingRect.center + Point2f(maxRectSize, maxRectSize);
+	getRectSubPix(rotated, rect_size, Point2f(rotated.cols/2, rotated.rows/2),cropped);
+	imshow("cropped1", cropped);
+	Mat extendMat(cropped.rows * 2.5, cropped.cols * 2.5, CV_8UC3, Scalar::all(255));
+	if (cropped.rows == 0 || cropped.cols == 0)
+	{
+		return false;
+	}
+	rect = Rect(cropped.cols / 2, cropped.rows / 2, cropped.cols, cropped.rows);
+	//correctRect(rect, cropped.size());
+	cropped.copyTo(extendMat(rect));
+	cropped = extendMat.clone();
+	/*imshow("cropped2", cropped);
+	waitKey();*/
+
+	return true;
 }
 
 void findCharacterRects(Mat& src, vector<RotatedRect> &filteredRects, std::string path /*= ""*/) {
@@ -246,16 +325,22 @@ void findNearRects(std::vector<RotatedRect> &rects, std::vector<RotatedRect> &ol
 		for (size_t rectId = 0; rectId < rects.size(); rectId++)
 		{
 			aRect = &rects[rectId];
-#ifdef SHOW_DEBUG
+#ifdef SHOW_DEBUG_
 			Mat rectMat1 = src.clone();
+			drawRotatedRectangle(rectMat1, *rect, Scalar(0, 0, 255));
 			drawRotatedRectangle(rectMat1, *aRect, Scalar(0, 255, 255));
 			namedWindow("rectangle", CV_WINDOW_NORMAL);
 			setWindowProperty("rectangle", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
 			imshow("rectangle", rectMat1);
-			waitKey(0);
+			//waitKey(0);
+			int ch = waitKeyEx(0);
+			if (ch == '1')
+			{
+				break;
+			}
 #endif // SHOW_DEBUG
-						//Don't group rectangles having angles are difference too much
-			if (abs(rect->angle - aRect->angle) > 65 && abs(abs(rect->angle - aRect->angle) - 90) > 10)
+			//Don't group rectangles having angles are difference too much
+			if (abs(rect->angle - aRect->angle) > 65 && abs(abs(rect->angle - aRect->angle) - 180) > 10)
 			{
 				continue;
 			}
@@ -287,7 +372,7 @@ void findARectGroup(std::vector<RotatedRect> &rects, std::vector<RotatedRect> &g
 	groupedRects.push_back(rect);
 	do
 	{
-		findNearRects(rects, oldRectGroup, newRectGroup, src);
+		findNearRects(rects, oldRectGroup, newRectGroup, src.clone());
 		oldRectGroup.clear();
 		oldRectGroup.assign(newRectGroup.begin(), newRectGroup.end());
 		for (size_t i = 0; i < newRectGroup.size(); i++)
@@ -302,34 +387,6 @@ void groupCharacterRects(vector<RotatedRect> &filteredRects, vector<vector<Rotat
 	{
 		vector<RotatedRect> aRectGroup;
 		findARectGroup(filteredRects, aRectGroup, src);
-//
-
-//		filteredRects.pop_back();
-//		RotatedRect *groupedRect, *filteredRect;
-//		
-//		for (size_t i = 0; i < filteredRects.size(); i++)
-//		{
-//			filteredRect = &filteredRects[i];
-
-//			for (size_t j = 0; j < aRectGroup.size(); j++)
-//			{
-//				groupedRect = &aRectGroup[j];
-//				//Don't group rectangles having angles are difference too much
-//				if (abs(groupedRect->angle - filteredRect->angle) > 45)
-//				{
-//					continue;
-//				}
-//				//Group the rectangles are quite near together
-//				if (norm(groupedRect->center - filteredRect->center) < (groupedRect->size.width + filteredRect->size.width) * 2)
-//				{
-//					aRectGroup.push_back(*filteredRect);
-
-					/*filteredRects.erase(filteredRects.begin() + i);
-					i--;
-					break;
-				}
-			}
-		}*/
 		groupedRects.push_back(aRectGroup);
 	}
 }
@@ -518,41 +575,42 @@ void findTextOfLine(Mat &src, vector<vector<RotatedRect>> &groupedRects, tessera
 	Mat outTextMat = src.clone();
 	for (size_t i = 0; i < groupedRects.size(); i++)
 	{
-		Mat groupedRectMat = src.clone();
+		//Mat groupedRectMat = src.clone();
 		vector<RotatedRect> aRectGroup = groupedRects[i];
-		vector<Point> wordContour;
-		float angleTotal = 0;
-		float angle;
-		for (size_t j = 0; j < aRectGroup.size(); j++)
-		{
-			angle = aRectGroup[j].angle;
-			if (aRectGroup[j].size.width > aRectGroup[j].size.height) {
-				if (aRectGroup[j].angle == 0) {
-					angle = -90;
-				}
-				else {
-					angle += 90.0;
-				}
-			}
-			angleTotal += angle;
-			drawRotatedRectangle(groupedRectMat, aRectGroup[j]);
-			cv::Point2f vertices2f[4];
-			aRectGroup[j].points(vertices2f);
+		//vector<Point> wordContour;
+		//vector<Point> centerPoints;
+		////float angleTotal = 0;
+		////float angle;
+		//for (size_t j = 0; j < aRectGroup.size(); j++)
+		//{
+		//	/*angle = aRectGroup[j].angle;
+		//	if (aRectGroup[j].size.width > aRectGroup[j].size.height) {
+		//		if (aRectGroup[j].angle == 0) {
+		//			angle = -90;
+		//		}
+		//		else {
+		//			angle += 90.0;
+		//		}
+		//	}
+		//	angleTotal += angle;*/
+		//	//drawRotatedRectangle(groupedRectMat, aRectGroup[j]);
+		//	cv::Point2f vertices2f[4];
+		//	aRectGroup[j].points(vertices2f);
+		//	for (int i = 0; i < 4; ++i) {
+		//		wordContour.push_back((Point)vertices2f[i]);
+		//	}
 
-			// Convert them so we can use them in a fillConvexPoly
-			for (int i = 0; i < 4; ++i) {
-				wordContour.push_back((Point)vertices2f[i]);
-			}
-		}
+		//	centerPoints.push_back(aRectGroup[j].center);
+		//}
 
-		angle = angleTotal / aRectGroup.size();
-		/*namedWindow("rectangle", CV_WINDOW_NORMAL);
-		setWindowProperty("rectangle", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
-		imshow("rectangle", groupedRectMat);*/
-		//waitKey(0);
+		////angle = angleTotal / aRectGroup.size();
+		///*namedWindow("rectangle", CV_WINDOW_NORMAL);
+		//setWindowProperty("rectangle", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
+		//imshow("rectangle", groupedRectMat);*/
+		////waitKey(0);
 		Mat cropped;
 		RotatedRect rect;
-		bool flag = cropByContour(src, wordContour, cropped, rect, angle);
+		bool flag = cropByContour(src, aRectGroup, cropped, rect);
 		if (!flag)
 		{
 			continue;
@@ -606,7 +664,7 @@ void findTextOfLine(Mat &src, vector<vector<RotatedRect>> &groupedRects, tessera
 		{
 			string outTextStr = outTextCh;
 			replaceChar(outTextStr);
-			putText(outTextMat, outTextStr, wordContour[0], FONT_HERSHEY_COMPLEX, 1, Scalar(0, 0, 255));
+			putText(outTextMat, outTextStr, rect.center, FONT_HERSHEY_COMPLEX, 1, Scalar(0, 0, 255));
 			outText.push_back(pair<string, RotatedRect>(outTextStr, rect));
 			continue;
 		}
@@ -702,6 +760,12 @@ bool detectText(Mat &src, vector<pair<string, RotatedRect>> &outText, std::strin
 	ocr->Init(g_traning_data_path.c_str(), "ngi+eng", tesseract::OEM_DEFAULT);
 	// Set Page segmentation mode to PSM_AUTO (3)
 	ocr->SetPageSegMode(tesseract::PSM_AUTO);
+	/*ocr->SetVariable("edges_max_children_per_outline", "0");
+	ocr->SetVariable("edges_max_children_layers", "0");
+	ocr->SetVariable("edges_children_per_grandchild", "1");
+	ocr->SetVariable("edges_children_count_limit", "2");*/
+	int i;
+	ocr->GetIntVariable("edges_max_children_per_outline", &i);
 	//ocr->SetVariable("tessedit_char_whitelist", "φ0123456789abcdefjhijklmnopqrstuvwxyzABCDEFJHIJKLMNOPQRSTUVWXYZ.,+-");
 	//string outTextStr;
 	//ocr->SetImage(src.data, src.cols, src.rows, 3, src.step);
