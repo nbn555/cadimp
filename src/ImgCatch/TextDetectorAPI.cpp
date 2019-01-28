@@ -41,7 +41,7 @@
 #include "LiProcess.h"
 #include <algorithm>
 
-#define SHOW_DEBUG
+//#define SHOW_DEBUG
 
 using namespace std;
 using namespace cv;
@@ -211,14 +211,20 @@ bool cropByContour(Mat &src, vector<RotatedRect>& aRectGroup, Mat &cropped, Rota
 	cropped = src(rect);
 	M = getRotationMatrix2D(Point2f(cropped.cols/2, cropped.rows/2), boundingRect.angle, 1.0);
 	// perform the affine transformation
+#ifdef SHOW_DEBUG
 	imshow("cropped", cropped);
+#endif
 	warpAffine(cropped, rotated, M, cropped.size(), INTER_CUBIC);//INTER_LANCSOZ4
-	imshow("rotated", rotated);
-	// crop the resulting image
+#ifdef SHOW_DEBUG
+    imshow("rotated", rotated);
+#endif
+    // crop the resulting image
 	//Point2f croppedRectCenter = boundingRect.center + Point2f(maxRectSize, maxRectSize);
 	getRectSubPix(rotated, rect_size, Point2f(rotated.cols/2, rotated.rows/2),cropped);
-	imshow("cropped1", cropped);
-	Mat extendMat(cropped.rows * 2.5, cropped.cols * 2.5, CV_8UC3, Scalar::all(255));
+#ifdef SHOW_DEBUG
+    imshow("cropped1", cropped);
+#endif
+    Mat extendMat(cropped.rows * 2.5, cropped.cols * 2.5, CV_8UC3, Scalar::all(255));
 	if (cropped.rows == 0 || cropped.cols == 0)
 	{
 		return false;
@@ -275,8 +281,10 @@ void findCharacterRects(Mat& src, vector<RotatedRect> &filteredRects, std::strin
 	}
 	//imshow("source", src);
 	//imshow("detected lines", lineMat);
-	std::string newPath = path + "Detectedlines.jpg";
+#ifdef SHOW_DEBUG
+    std::string newPath = path + "Detectedlines.jpg";
 	imwrite(newPath, binaryMat);
+#endif
 	//waitKey();
 	findContours(binaryMat.clone(), contours, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_NONE);
 	//Filter contours
@@ -574,37 +582,40 @@ void replaceChar(string& str) {
 void findTextOfLine(Mat &src, vector<vector<RotatedRect>> &groupedRects, tesseract::TessBaseAPI *ocr, vector<pair<string, RotatedRect>> &outText, std::string path/* = ""*/){
     Mat outTextMat = src.clone();
    // Mat outTextMatShow = src.clone();
-	for (size_t i = 0; i < groupedRects.size(); i++)
-	{
-		//Mat groupedRectMat = src.clone();
-		vector<RotatedRect> aRectGroup = groupedRects[i];
-		//vector<Point> wordContour;
-		//vector<Point> centerPoints;
-		////float angleTotal = 0;
-		////float angle;
-		//for (size_t j = 0; j < aRectGroup.size(); j++)
-		//{
-		//	/*angle = aRectGroup[j].angle;
-		//	if (aRectGroup[j].size.width > aRectGroup[j].size.height) {
-		//		if (aRectGroup[j].angle == 0) {
-		//			angle = -90;
-		//		}
-		//		else {
-		//			angle += 90.0;
-		//		}
-		//	}
-		//	angleTotal += angle;*/
-		//	//drawRotatedRectangle(groupedRectMat, aRectGroup[j]);
-		//	cv::Point2f vertices2f[4];
-		//	aRectGroup[j].points(vertices2f);
-		//	for (int i = 0; i < 4; ++i) {
-		//		wordContour.push_back((Point)vertices2f[i]);
-		//	}
+    for (size_t i = 0; i < groupedRects.size(); i++)
+    {
+        //Mat groupedRectMat = src.clone();
+        vector<RotatedRect> aRectGroup = groupedRects[i];
+        //vector<Point> wordContour;
+        //vector<Point> centerPoints;
+        ////float angleTotal = 0;
+        ////float angle;
+        //for (size_t j = 0; j < aRectGroup.size(); j++)
+        //{
+        //	/*angle = aRectGroup[j].angle;
+        //	if (aRectGroup[j].size.width > aRectGroup[j].size.height) {
+        //		if (aRectGroup[j].angle == 0) {
+        //			angle = -90;
+        //		}
+        //		else {
+        //			angle += 90.0;
+        //		}
+        //	}
+        //	angleTotal += angle;*/
+        //	//drawRotatedRectangle(groupedRectMat, aRectGroup[j]);
+        //	cv::Point2f vertices2f[4];
+        //	aRectGroup[j].points(vertices2f);
+        //	for (int i = 0; i < 4; ++i) {
+        //		wordContour.push_back((Point)vertices2f[i]);
+        //	}
 
-		//	centerPoints.push_back(aRectGroup[j].center);
-		//}
+        //	centerPoints.push_back(aRectGroup[j].center);
+        //}
 
 //		angle = angleTotal / aRectGroup.size();
+
+#if 0 // Calculate angle by Nghi
+
         float rangle;
         if (centerPs.size() > 1) {
             float dx = centerPs[0].x - centerPs.back().x;
@@ -618,7 +629,7 @@ void findTextOfLine(Mat &src, vector<vector<RotatedRect>> &groupedRects, tessera
                 float l = sqrt(dx*dx + dy*dy);
                 rangle = atan2(dy / l, dx / l);
                 rangle *= 180 / 3.1415926;
-            //    angle = rangle;
+                //    angle = rangle;
             }
             else {
                 std::sort(centerPs.begin(), centerPs.end(),
@@ -629,9 +640,12 @@ void findTextOfLine(Mat &src, vector<vector<RotatedRect>> &groupedRects, tessera
                 float l = sqrt(dx*dx + dy*dy);
                 rangle = atan2(dy / l, dx / l);
                 rangle *= 180 / 3.1415926;
-         //       angle = rangle;
+                //       angle = rangle;
             }
         }
+    
+#endif
+
 		/*namedWindow("rectangle", CV_WINDOW_NORMAL);
 		setWindowProperty("rectangle", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
 		imshow("rectangle", groupedRectMat);*/
