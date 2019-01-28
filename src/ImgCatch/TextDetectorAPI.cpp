@@ -572,7 +572,8 @@ void replaceChar(string& str) {
 }
 
 void findTextOfLine(Mat &src, vector<vector<RotatedRect>> &groupedRects, tesseract::TessBaseAPI *ocr, vector<pair<string, RotatedRect>> &outText, std::string path/* = ""*/){
-	Mat outTextMat = src.clone();
+    Mat outTextMat = src.clone();
+   // Mat outTextMatShow = src.clone();
 	for (size_t i = 0; i < groupedRects.size(); i++)
 	{
 		//Mat groupedRectMat = src.clone();
@@ -603,11 +604,38 @@ void findTextOfLine(Mat &src, vector<vector<RotatedRect>> &groupedRects, tessera
 		//	centerPoints.push_back(aRectGroup[j].center);
 		//}
 
-		////angle = angleTotal / aRectGroup.size();
-		///*namedWindow("rectangle", CV_WINDOW_NORMAL);
-		//setWindowProperty("rectangle", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
-		//imshow("rectangle", groupedRectMat);*/
-		////waitKey(0);
+//		angle = angleTotal / aRectGroup.size();
+        float rangle;
+        if (centerPs.size() > 1) {
+            float dx = centerPs[0].x - centerPs.back().x;
+            float dy = centerPs[0].y - centerPs.back().y;
+            if (abs(dx) > abs(dy)) {
+                std::sort(centerPs.begin(), centerPs.end(),
+                    [=](const Point &pl, const Point &pr)->bool {
+                    return pl.x < pr.x; });
+                dx = abs(centerPs[0].x - centerPs.back().x);
+                dy = abs(centerPs[0].y - centerPs.back().y);
+                float l = sqrt(dx*dx + dy*dy);
+                rangle = atan2(dy / l, dx / l);
+                rangle *= 180 / 3.1415926;
+            //    angle = rangle;
+            }
+            else {
+                std::sort(centerPs.begin(), centerPs.end(),
+                    [=](const Point &pl, const Point &pr)->bool {
+                    return pl.y < pr.y; });
+                dx = abs(centerPs[0].x - centerPs.back().x);
+                dy = abs(centerPs[0].y - centerPs.back().y);
+                float l = sqrt(dx*dx + dy*dy);
+                rangle = atan2(dy / l, dx / l);
+                rangle *= 180 / 3.1415926;
+         //       angle = rangle;
+            }
+        }
+		/*namedWindow("rectangle", CV_WINDOW_NORMAL);
+		setWindowProperty("rectangle", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
+		imshow("rectangle", groupedRectMat);*/
+		//waitKey(0);
 		Mat cropped;
 		RotatedRect rect;
 		bool flag = cropByContour(src, aRectGroup, cropped, rect);
@@ -615,6 +643,8 @@ void findTextOfLine(Mat &src, vector<vector<RotatedRect>> &groupedRects, tessera
 		{
 			continue;
 		}
+
+       // drawRotatedRectangle(outTextMatShow, rect);
 #ifdef SHOW_DEBUG
 		/*imshow("cropped", cropped);
 		waitKey(0);*/
@@ -742,6 +772,8 @@ void findTextOfLine(Mat &src, vector<vector<RotatedRect>> &groupedRects, tessera
 		}
 		//waitKey(0);
 	}
+
+  //  imshow("FFFFFFFFFFFFF", outTextMatShow);
 //#ifdef SHOW_DEBUG
 	string newPath = path + "TextMat.jpg";
 	imwrite(newPath, outTextMat);
@@ -781,9 +813,31 @@ bool detectText(Mat &src, vector<pair<string, RotatedRect>> &outText, std::strin
 	imshow("Original image", src);*/
 	vector<RotatedRect> filteredRects;
 	findCharacterRects(src, filteredRects, path);
+
+   /* Mat rectMat1 = src.clone();
+    for (RotatedRect &rrec : filteredRects) {
+        drawRotatedRectangle(rectMat1, rrec, Scalar(0, 255, 255));
+    }
+    namedWindow("detected_contour", CV_WINDOW_NORMAL);
+    setWindowProperty("detected_contour", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
+    imshow("detected_contour", rectMat1);*/
+   // waitKey(0);
 	//group contours
 	vector<vector<RotatedRect>> groupedRects;
 	groupCharacterRects(filteredRects, groupedRects, src);
+
+    /*Mat rectMat2 = src.clone();
+    for (vector<RotatedRect> &rrecg : groupedRects) {
+        int r = rand() % 255;
+        int g = rand() % 255;
+        int b = rand() % 255;
+        for (RotatedRect &rrec : rrecg) {
+            drawRotatedRectangle(rectMat2, rrec, Scalar(b, g, r));
+        }
+    }
+
+    imshow("detected_contour2", rectMat2);*/
+    //waitKey(0);
 
 	findTextOfLine(src, groupedRects, ocr, outText, path);
 	delete(ocr);
