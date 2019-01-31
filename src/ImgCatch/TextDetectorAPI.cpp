@@ -324,6 +324,51 @@ void findCharacterRects(Mat& src, vector<RotatedRect> &filteredRects, std::strin
 	}
 }
 
+double distanceFromPointToLine(cv::Point line_start, cv::Point line_end, cv::Point point)
+{
+	double normalLength = _hypot(line_end.x - line_start.x, line_end.y - line_start.y);
+	double distance = (double)((point.x - line_start.x) * (line_end.y - line_start.y) - (point.y - line_start.y) * (line_end.x - line_start.x)) / normalLength;
+	return distance;
+}
+
+void findLine(std::vector<RotatedRect> rects) {
+	const double maxDistance = 5.0;
+	if (rects.size() <= 2)
+	{
+		return;
+	}
+	std::vector<Point> allCenterPoints;
+	allCenterPoints.resize(rects.size());
+	for (size_t i = 0; i < rects.size(); i++)
+	{
+		allCenterPoints[i] = rects[i].center;
+	}
+	std::vector<std::vector<Point>> arrangedPoints;
+	std::vector<Point> remainCenterPoints;
+	remainCenterPoints.assign(allCenterPoints.begin(), allCenterPoints.end());
+	Point lineStart = remainCenterPoints.back();
+	remainCenterPoints.pop_back();
+	while (!remainCenterPoints.empty())
+	{
+		std::vector<Point> aLine;
+		Point lineEnd = remainCenterPoints.back();
+		remainCenterPoints.pop_back();
+		aLine.push_back(lineStart);
+		aLine.push_back(lineEnd);
+		
+		for (size_t i = 0; i < remainCenterPoints.size(); i++)
+		{
+			double distance = distanceFromPointToLine(lineStart, lineEnd, allCenterPoints[i]);
+			if (distance < 5.0)
+			{
+				aLine.push_back(allCenterPoints[i]);
+				remainCenterPoints.erase(remainCenterPoints.begin() + i);
+				i--;
+			}
+		}
+
+	}
+}
 void findNearRects(std::vector<RotatedRect> &rects, std::vector<RotatedRect> &oldNearRects, std::vector<RotatedRect> &newNearRects, Mat &src) {
 	newNearRects.clear();
 	RotatedRect *aRect, *rect;
