@@ -41,7 +41,7 @@
 #include "LiProcess.h"
 #include <algorithm>
 
-//#define SHOW_DEBUG
+#define SHOW_DEBUG
 
 using namespace std;
 using namespace cv;
@@ -123,11 +123,17 @@ bool correctRect(Rect &rect, Size size) {
 	{
 		rect.height = size.height - rect.y - 1;
 	}
+	if (rect.width <= 0 || rect.height <= 0)
+	{
+		return false;
+	}
+	return true;
 }
 
-bool cropByContour(Mat &src, vector<RotatedRect>& aRectGroup, Mat &cropped, RotatedRect& boundingRect) {
+void calculateRotatedRect(const vector<RotatedRect>& aRectGroup, RotatedRect& boundingRect) {
 	vector<Point> wordContour;
 	vector<Point> centerPoints;
+	//Get minAreaRect of the rect group
 	for (size_t j = 0; j < aRectGroup.size(); j++)
 	{
 		cv::Point2f vertices2f[4];
@@ -146,96 +152,117 @@ bool cropByContour(Mat &src, vector<RotatedRect>& aRectGroup, Mat &cropped, Rota
 	setWindowProperty("rectangle", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
 	imshow("rectangle", groupedRectMat);
 	waitKey(0);*/
+	//Calculate rotate rect
 	float angle;
+	//If there is only one char, the longer size is the height
 	if (aRectGroup.size() == 1) {
 		angle = boundingRect.angle;
+		//If the rotated rect width is greater than height, need to swap width & height and need to shift angle by 90 degree
 		if (boundingRect.size.width > boundingRect.size.height)
 		{
 			angle = boundingRect.angle > -2.0 && boundingRect.angle <= 0.0 ? -90.0 : angle + 90.0;
 			swap(boundingRect.size.width, boundingRect.size.height);
 		}
 	}
-	else {
-		if (aRectGroup.size() == 2)
+	//If there are 2 chars in the group, the rotated angle is based on the line connecting 2 centers of these 2 chars
+	else if (aRectGroup.size() == 2)
+	{
+		Point pointDiff = centerPoints[1] - centerPoints[0];
+		angle = cvFastArctan(pointDiff.y, pointDiff.x);
+		//Convert angle range (0,360) to (-90,90)
+		if (angle > 90 & angle <= 180)
 		{
-			Point pointDiff = centerPoints[1] - centerPoints[0];
-			angle = cvFastArctan(pointDiff.y, pointDiff.x);
-			if (angle > 90 & angle <= 180)
-			{
-				angle -= 180;
-			}
-			else if (angle > 180 && angle <= 270)
-			{
-				angle -= 180;
-			}
-			else if (angle > 270 && angle <= 360)
-			{
-				angle -= 360;
-			}
-			float angleDistance = abs(boundingRect.angle - angle);
-			if (angleDistance < 45 || angleDistance > 135) {
-				angle = boundingRect.angle;
-			}
-			else
-			{
-				angle = boundingRect.angle > -2.0 && boundingRect.angle <= 0.0 ? -90.0 : boundingRect.angle + 90.0;
-				swap(boundingRect.size.width, boundingRect.size.height);
-			}
+			angle -= 180;
 		}
+		else if (angle > 180 && angle <= 270)
+		{
+			angle -= 180;
+		}
+		else if (angle > 270 && angle <= 360)
+		{
+			angle -= 360;
+		}
+		//If the angle of the line connecting 2 centers is similar rotated rect angle, the rotated angle is equal angle of the rotated rect
+		float angleDistance = abs(boundingRect.angle - angle);
+		if (angleDistance < 45 || angleDistance > 135) {
+			angle = boundingRect.angle;
+		}
+		//Else, need to swap width & height of the rotated rect and shift the rotated angle to 90 degree
 		else
 		{
-			RotatedRect centerRect = minAreaRect(centerPoints);
-			angle = centerRect.angle;
-			if (centerRect.size.width < centerRect.size.height)
-			{
-				angle = angle > -2.0 && angle <= 0.0 ? -90.0 : angle + 90.0;
-			}
-			float angleDistance = abs(boundingRect.angle - angle);
-			if (angleDistance > 45 && angleDistance < 135)
-			{
-				swap(boundingRect.size.width, boundingRect.size.height);
-			}
+			angle = boundingRect.angle > -2.0 && boundingRect.angle <= 0.0 ? -90.0 : boundingRect.angle + 90.0;
+			swap(boundingRect.size.width, boundingRect.size.height);
+		}
+	}
+	//If there are more than 3 chars, the rotated angle is calculated based on minAreaRect which bounds the centers of the chars. 
+	//The width of the rotated rect is alway greater than the height
+	else
+	{
+		RotatedRect centerRect = minAreaRect(centerPoints);
+		angle = centerRect.angle;
+		if (centerRect.size.width < centerRect.size.height)
+		{
+			angle = angle > -2.0 && angle <= 0.0 ? -90.0 : angle + 90.0;
+		}
+		float angleDistance = abs(boundingRect.angle - angle);
+		if (angleDistance > 45 && angleDistance < 135)
+		{
+			swap(boundingRect.size.width, boundingRect.size.height);
 		}
 	}
 	boundingRect.angle = angle;
-	
+}
+bool cropByContour(Mat &src, vector<RotatedRect>& aRectGroup, Mat &outMat, RotatedRect& boundingRect) {
+
+	calculateRotatedRect(aRectGroup, boundingRect);
 	Size2f rect_size = boundingRect.size;
-	//cout << angle << endl;
+	//Add 2 pixel to rotated rect because some pixels of char maybe loss
 	rect_size.width += 2;
 	rect_size.height += 2;
+
 	// get the rotation matrix
 	Mat M, rotated;
-	int maxRectSize = max(rect_size.width, rect_size.height) * 2.5;
-	cv::Rect rect(boundingRect.center - Point2f(maxRectSize / 2, maxRectSize / 2), Size2i(maxRectSize, maxRectSize));
-	correctRect(rect, src.size());
-	cropped = src(rect);
-	M = getRotationMatrix2D(Point2f(cropped.cols/2, cropped.rows/2), boundingRect.angle, 1.0);
-	// perform the affine transformation
+	cv::Rect rect = boundingRect.boundingRect(); //(boundingRect.center - Point2f(maxRectSize / 2, maxRectSize / 2), Size2i(maxRectSize, maxRectSize));
+	if (!correctRect(rect, src.size())) {
+		return false;
+	}
+	Mat cropped = src(rect);
+	//If the rotated angle is less than 5, don't need to rotate
+	if (abs(boundingRect.angle) < 5)
+	{
+		//Add background to border of cropped image because the Tesseract requires min distance from text to the edges of the image
+		outMat = Mat(cropped.rows * 2.5, cropped.cols * 2.5, CV_8UC3, Scalar::all(255));
+		rect = Rect((outMat.cols - cropped.cols) / 2, (outMat.rows - cropped.rows) / 2, cropped.cols, cropped.rows);
+		cropped.copyTo(outMat(rect));
+		return true;
+	}
+	//Extend both 2 directions of the cropped img to longer size to avoid lossing data when rotating
+	int maxRectSize = max(rect.width, rect.height);// *2.5;
+	Mat extendCroppedMat(maxRectSize, maxRectSize, CV_8UC3, Scalar::all(255));
+	rect = Rect((extendCroppedMat.cols - cropped.cols) / 2, (extendCroppedMat.rows - cropped.rows) / 2, cropped.cols, cropped.rows);
+	cropped.copyTo(extendCroppedMat(rect));
+	//Rotate extended & cropped img
+	M = getRotationMatrix2D(Point2f(extendCroppedMat.cols/2, extendCroppedMat.rows/2), boundingRect.angle, 1.0);
+	warpAffine(extendCroppedMat, rotated, M, extendCroppedMat.size(), INTER_CUBIC, 0, Scalar::all(255));//INTER_LANCSOZ4
 #ifdef SHOW_DEBUG
-	imshow("cropped", cropped);
-#endif
-	warpAffine(cropped, rotated, M, cropped.size(), INTER_CUBIC);//INTER_LANCSOZ4
-#ifdef SHOW_DEBUG
+	imshow("extendCroppedMat", extendCroppedMat);
     imshow("rotated", rotated);
 #endif
     // crop the resulting image
-	//Point2f croppedRectCenter = boundingRect.center + Point2f(maxRectSize, maxRectSize);
 	getRectSubPix(rotated, rect_size, Point2f(rotated.cols/2, rotated.rows/2),cropped);
 #ifdef SHOW_DEBUG
     imshow("cropped1", cropped);
 #endif
-    Mat extendMat(cropped.rows * 2.5, cropped.cols * 2.5, CV_8UC3, Scalar::all(255));
-	if (cropped.rows == 0 || cropped.cols == 0)
-	{
-		return false;
-	}
-	rect = Rect(cropped.cols / 2, cropped.rows / 2, cropped.cols, cropped.rows);
+	//Add background to border of cropped image because the Tesseract requires min distance from text to the edges of the image
+    outMat = Mat(cropped.rows * 2.5, cropped.cols * 2.5, CV_8UC3, Scalar::all(255));
+	rect = Rect((outMat.cols - cropped.cols) / 2, (outMat.rows - cropped.rows) / 2, cropped.cols, cropped.rows);
 	//correctRect(rect, cropped.size());
-	cropped.copyTo(extendMat(rect));
-	cropped = extendMat.clone();
-	/*imshow("cropped2", cropped);
-	waitKey();*/
-
+	cropped.copyTo(outMat(rect));
+#ifdef SHOW_DEBUG
+	imshow("cropped2", outMat);
+	waitKey();
+	cvDestroyAllWindows();
+#endif
 	return true;
 }
 
@@ -283,7 +310,7 @@ void findCharacterRects(Mat& src, vector<RotatedRect> &filteredRects, std::strin
 	//imshow("detected lines", lineMat);
 #ifdef SHOW_DEBUG
     std::string newPath = path + "Detectedlines.jpg";
-	imwrite(newPath, binaryMat);
+	imwrite(newPath, lineMat);
 #endif
 	//waitKey();
 	findContours(binaryMat.clone(), contours, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_NONE);
@@ -855,6 +882,14 @@ bool detectText(Mat &src, vector<pair<string, RotatedRect>> &outText, std::strin
 	ocr->SetVariable("edges_max_children_layers", "0");
 	ocr->SetVariable("edges_children_per_grandchild", "1");
 	ocr->SetVariable("edges_children_count_limit", "2");*/
+	/*
+	ocr->SetVariable("load_system_dawg", "0");
+	ocr->SetVariable("load_freq_dawg", "0");
+	ocr->SetVariable("load_unambig_dawg", "0");
+	ocr->SetVariable("load_punc_dawg", "0");
+	ocr->SetVariable("load_number_dawg", "0");
+	ocr->SetVariable("load_fixed_length_dawgs", "0");
+	ocr->SetVariable("load_bigram_dawg", "0");*/
 	int i;
 	ocr->GetIntVariable("edges_max_children_per_outline", &i);
 	//ocr->SetVariable("tessedit_char_whitelist", "φ0123456789abcdefjhijklmnopqrstuvwxyzABCDEFJHIJKLMNOPQRSTUVWXYZ.,+-");
